@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "335944359227",
+    "project_id": "daily-win-d2953",
+    "storage_bucket": "daily-win-d2953.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:335944359227:android:eb2cfb2742f3877433eb1e",
+        "android_client_info": {
+          "package_name": "com.example.dailywin"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB7Jk-vfx2B40AC-_1UVIJfYwMJ8FElVy0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

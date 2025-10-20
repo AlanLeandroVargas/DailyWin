@@ -56,9 +56,14 @@ fun LoginScreen(
             Spacer(modifier = Modifier.height(20.dp))
 
             Button(onClick = {
-                if (viewModel.login()) onLoginSuccess()
+                viewModel.signIn()
             }) {
                 Text("Login")
+            }
+            Button(onClick = {
+                viewModel.createAccount()
+            }){
+                Text("Registrarse")
             }
         }
     }
