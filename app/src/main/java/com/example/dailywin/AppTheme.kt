@@ -11,15 +11,15 @@ fun AppTheme(
     content: @Composable () -> Unit
 ) {
     val colors = if (darkTheme) {
-        darkColorScheme()  // Default dark colors
+        darkColorScheme()
     } else {
-        lightColorScheme() // Default light colors
+        lightColorScheme()
     }
 
     MaterialTheme(
         colorScheme = colors,
-        typography = MaterialTheme.typography, // use defaults
-        shapes = MaterialTheme.shapes,         // use defaults
+        typography = MaterialTheme.typography,
+        shapes = MaterialTheme.shapes,
         content = content
     )
 }

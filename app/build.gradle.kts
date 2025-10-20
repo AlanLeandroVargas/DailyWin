@@ -40,6 +40,9 @@ android {
 }
 
 dependencies {
+    implementation("androidx.compose.material:material-icons-core")
+    implementation("androidx.compose.material:material-icons-extended")
+    implementation(platform("androidx.compose:compose-bom:2024.10.00"))
     implementation(libs.androidx.navigation.compose)
     implementation (libs.androidx.material3)
     implementation(libs.androidx.ui.tooling.preview)

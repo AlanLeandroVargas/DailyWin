@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.StateFlow
 
 class LoginViewModel : ViewModel() {
 
-    private var auth: FirebaseAuth = FirebaseAuth.getInstance()
+    private lateinit var auth: FirebaseAuth
 
     private val _signInResult = MutableStateFlow<Result<FirebaseUser?>>(Result.success(null))
     val signInResult: StateFlow<Result<FirebaseUser?>> = _signInResult
