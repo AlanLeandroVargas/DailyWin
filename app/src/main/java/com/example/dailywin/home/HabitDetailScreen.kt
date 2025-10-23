@@ -1,26 +1,46 @@
 package com.example.dailywin.home
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.ExposedDropdownMenuDefaults
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -36,8 +56,8 @@ fun HabitDetailScreen(
     var category by remember { mutableStateOf(habit?.category ?: "") }
     var description by remember { mutableStateOf(habit?.description ?: "") }
     var time by remember { mutableStateOf(habit?.time ?: "") }
-    var priorityIndex by remember { mutableStateOf(habit?.priority?.ordinal ?: 1) }
-    var frequencyIndex by remember { mutableStateOf(habit?.frequency?.ordinal ?: 0) }
+    var selectedPriority by remember { mutableStateOf(habit?.priority ?: Priority.MEDIUM) }
+    var selectedFrequency by remember { mutableStateOf(habit?.frequency ?: Frequency.DAILY) }
     var startDate by remember { mutableStateOf(habit?.startDate ?: "") }
     var endDate by remember { mutableStateOf(habit?.endDate ?: "") }
     var dailyGoal by remember { mutableStateOf(habit?.dailyGoal ?: "") }
@@ -47,18 +67,14 @@ fun HabitDetailScreen(
     val priorities = Priority.values()
     val frequencies = Frequency.values()
 
-    var categoryExpanded by remember { mutableStateOf(false) }
-    var priorityExpanded by remember { mutableStateOf(false) }
-    var frequencyExpanded by remember { mutableStateOf(false) }
-
     Scaffold(
         topBar = {
             TopAppBar(
                 title = {
                     Text(
-                        text = if (habit == null) "Nuevo Hábito" else "Editar Hábito",
-                        fontSize = 24.sp,
-                        fontWeight = FontWeight.Bold
+                        text = if (habit == null) "Nuevo hábito" else "Editar hábito",
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Medium
                     )
                 },
                 navigationIcon = {
@@ -66,6 +82,41 @@ fun HabitDetailScreen(
                         Icon(
                             imageVector = Icons.Default.ArrowBack,
                             contentDescription = "Volver"
+                        )
+                    }
+                },
+                actions = {
+                    IconButton(
+                        onClick = {
+                            if (name.isNotBlank()) {
+                                val newHabit = Habit(
+                                    id = habit?.id ?: 0,
+                                    name = name,
+                                    category = category,
+                                    description = description,
+                                    time = time,
+                                    reminders = habit?.reminders ?: emptyList(),
+                                    priority = selectedPriority,
+                                    frequency = selectedFrequency,
+                                    startDate = startDate,
+                                    endDate = endDate,
+                                    dailyGoal = dailyGoal,
+                                    additionalGoal = additionalGoal,
+                                    completed = habit?.completed ?: false,
+                                    streak = habit?.streak ?: 0
+                                )
+                                onSave(newHabit)
+                            }
+                        },
+                        enabled = name.isNotBlank()
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Check,
+                            contentDescription = "Guardar",
+                            tint = if (name.isNotBlank())
+                                MaterialTheme.colorScheme.primary
+                            else
+                                MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 },
@@ -81,217 +132,277 @@ fun HabitDetailScreen(
                 .padding(paddingValues)
                 .verticalScroll(rememberScrollState())
                 .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
-            OutlinedTextField(
-                value = name,
-                onValueChange = { name = it },
-                label = { Text("Nombre del Hábito *") },
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true
-            )
-
-            ExposedDropdownMenuBox(
-                expanded = categoryExpanded,
-                onExpandedChange = { categoryExpanded = !categoryExpanded }
-            ) {
-                OutlinedTextField(
-                    value = category,
-                    onValueChange = {},
-                    readOnly = true,
-                    label = { Text("Categoría") },
-                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = categoryExpanded) },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .menuAnchor()
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(
+                    text = "Nombre",
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
-                ExposedDropdownMenu(
-                    expanded = categoryExpanded,
-                    onDismissRequest = { categoryExpanded = false }
+                OutlinedTextField(
+                    value = name,
+                    onValueChange = { name = it },
+                    placeholder = { Text("Ej: Hacer ejercicio") },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true,
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = MaterialTheme.colorScheme.primary,
+                        unfocusedBorderColor = MaterialTheme.colorScheme.outline
+                    )
+                )
+            }
+
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(
+                    text = "Prioridad",
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    categories.forEach { cat ->
-                        DropdownMenuItem(
-                            text = { Text(cat) },
-                            onClick = {
-                                category = cat
-                                categoryExpanded = false
-                            }
+                    priorities.forEach { priority ->
+                        PriorityChip(
+                            priority = priority,
+                            selected = selectedPriority == priority,
+                            onClick = { selectedPriority = priority },
+                            modifier = Modifier.weight(1f)
                         )
                     }
                 }
             }
 
-            OutlinedTextField(
-                value = description,
-                onValueChange = { description = it },
-                label = { Text("Descripción") },
-                modifier = Modifier.fillMaxWidth(),
-                minLines = 3,
-                maxLines = 5
-            )
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(
+                    text = "Categoría",
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    categories.take(3).forEach { cat ->
+                        CategoryChip(
+                            category = cat,
+                            selected = category == cat,
+                            onClick = { category = cat },
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                }
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    categories.drop(3).forEach { cat ->
+                        CategoryChip(
+                            category = cat,
+                            selected = category == cat,
+                            onClick = { category = cat },
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                }
+            }
 
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(
+                    text = "Frecuencia",
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    frequencies.forEach { freq ->
+                        FrequencyChip(
+                            frequency = freq,
+                            selected = selectedFrequency == freq,
+                            onClick = { selectedFrequency = freq },
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                }
+            }
+
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(
+                    text = "Hora",
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
                 OutlinedTextField(
                     value = time,
                     onValueChange = { time = it },
-                    label = { Text("Hora") },
                     placeholder = { Text("HH:MM") },
-                    modifier = Modifier.weight(1f),
-                    singleLine = true
-                )
-
-                ExposedDropdownMenuBox(
-                    expanded = priorityExpanded,
-                    onExpandedChange = { priorityExpanded = !priorityExpanded },
-                    modifier = Modifier.weight(1f)
-                ) {
-                    OutlinedTextField(
-                        value = priorities[priorityIndex].name,
-                        onValueChange = {},
-                        readOnly = true,
-                        label = { Text("Prioridad") },
-                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = priorityExpanded) },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .menuAnchor()
-                    )
-                    ExposedDropdownMenu(
-                        expanded = priorityExpanded,
-                        onDismissRequest = { priorityExpanded = false }
-                    ) {
-                        priorities.forEachIndexed { index, priority ->
-                            DropdownMenuItem(
-                                text = { Text(priority.name) },
-                                onClick = {
-                                    priorityIndex = index
-                                    priorityExpanded = false
-                                }
-                            )
-                        }
-                    }
-                }
-            }
-
-            ExposedDropdownMenuBox(
-                expanded = frequencyExpanded,
-                onExpandedChange = { frequencyExpanded = !frequencyExpanded }
-            ) {
-                OutlinedTextField(
-                    value = frequencies[frequencyIndex].name,
-                    onValueChange = {},
-                    readOnly = true,
-                    label = { Text("Frecuencia") },
-                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = frequencyExpanded) },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .menuAnchor()
-                )
-                ExposedDropdownMenu(
-                    expanded = frequencyExpanded,
-                    onDismissRequest = { frequencyExpanded = false }
-                ) {
-                    frequencies.forEachIndexed { index, frequency ->
-                        DropdownMenuItem(
-                            text = { Text(frequency.name) },
-                            onClick = {
-                                frequencyIndex = index
-                                frequencyExpanded = false
-                            }
-                        )
-                    }
-                }
-            }
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                OutlinedTextField(
-                    value = startDate,
-                    onValueChange = { startDate = it },
-                    label = { Text("Fecha Inicio") },
-                    placeholder = { Text("YYYY-MM-DD") },
-                    modifier = Modifier.weight(1f),
-                    singleLine = true
-                )
-
-                OutlinedTextField(
-                    value = endDate,
-                    onValueChange = { endDate = it },
-                    label = { Text("Fecha Fin") },
-                    placeholder = { Text("YYYY-MM-DD") },
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier.fillMaxWidth(),
                     singleLine = true
                 )
             }
 
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(
+                    text = "Objetivo diario",
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
                 OutlinedTextField(
                     value = dailyGoal,
                     onValueChange = { dailyGoal = it },
-                    label = { Text("Objetivo Diario") },
                     placeholder = { Text("Ej: 30 minutos") },
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier.fillMaxWidth(),
                     singleLine = true
                 )
+            }
 
+            // Descripción
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(
+                    text = "Notas",
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
                 OutlinedTextField(
-                    value = additionalGoal,
-                    onValueChange = { additionalGoal = it },
-                    label = { Text("Objetivo Adicional") },
-                    placeholder = { Text("Ej: Mejorar resistencia") },
-                    modifier = Modifier.weight(1f),
-                    singleLine = true
+                    value = description,
+                    onValueChange = { description = it },
+                    placeholder = { Text("Agrega notas sobre este hábito") },
+                    modifier = Modifier.fillMaxWidth(),
+                    minLines = 3,
+                    maxLines = 5
                 )
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(40.dp))
+        }
+    }
+}
 
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                OutlinedButton(
-                    onClick = onCancel,
-                    modifier = Modifier.weight(1f)
-                ) {
-                    Text("Cancelar")
-                }
+@Composable
+fun PriorityChip(
+    priority: Priority,
+    selected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val backgroundColor = when (priority) {
+        Priority.HIGH -> Color(0xFFE53935)
+        Priority.MEDIUM -> Color(0xFFFB8C00)
+        Priority.LOW -> Color(0xFF43A047)
+    }
 
-                Button(
-                    onClick = {
-                        if (name.isNotBlank()) {
-                            val newHabit = Habit(
-                                id = habit?.id ?: 0,
-                                name = name,
-                                category = category,
-                                description = description,
-                                time = time,
-                                reminders = habit?.reminders ?: emptyList(),
-                                priority = priorities[priorityIndex],
-                                frequency = frequencies[frequencyIndex],
-                                startDate = startDate,
-                                endDate = endDate,
-                                dailyGoal = dailyGoal,
-                                additionalGoal = additionalGoal,
-                                completed = habit?.completed ?: false,
-                                streak = habit?.streak ?: 0
-                            )
-                            onSave(newHabit)
-                        }
-                    },
-                    modifier = Modifier.weight(1f),
-                    enabled = name.isNotBlank()
-                ) {
-                    Text(if (habit == null) "Crear" else "Actualizar")
-                }
-            }
+    val label = when (priority) {
+        Priority.HIGH -> "Alta"
+        Priority.MEDIUM -> "Media"
+        Priority.LOW -> "Baja"
+    }
+
+    Surface(
+        modifier = modifier
+            .height(48.dp)
+            .clickable { onClick() },
+        shape = RoundedCornerShape(12.dp),
+        color = if (selected) backgroundColor else Color.Transparent,
+        border = androidx.compose.foundation.BorderStroke(
+            width = 2.dp,
+            color = backgroundColor
+        )
+    ) {
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier.fillMaxSize()
+        ) {
+            Text(
+                text = label,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Medium,
+                color = if (selected) Color.White else backgroundColor
+            )
+        }
+    }
+}
+
+@Composable
+fun CategoryChip(
+    category: String,
+    selected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        modifier = modifier
+            .height(40.dp)
+            .clickable { onClick() },
+        shape = RoundedCornerShape(20.dp),
+        color = if (selected)
+            MaterialTheme.colorScheme.primaryContainer
+        else
+            MaterialTheme.colorScheme.surfaceVariant
+    ) {
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier.fillMaxSize()
+        ) {
+            Text(
+                text = category,
+                fontSize = 12.sp,
+                fontWeight = if (selected) FontWeight.Medium else FontWeight.Normal,
+                color = if (selected)
+                    MaterialTheme.colorScheme.onPrimaryContainer
+                else
+                    MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
+}
+
+@Composable
+fun FrequencyChip(
+    frequency: Frequency,
+    selected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val label = when (frequency) {
+        Frequency.DAILY -> "Diaria"
+        Frequency.WEEKLY -> "Semanal"
+        Frequency.MONTHLY -> "Mensual"
+        Frequency.CUSTOM -> "Custom"
+    }
+
+    Surface(
+        modifier = modifier
+            .height(40.dp)
+            .clickable { onClick() },
+        shape = RoundedCornerShape(20.dp),
+        color = if (selected)
+            MaterialTheme.colorScheme.primaryContainer
+        else
+            MaterialTheme.colorScheme.surfaceVariant
+    ) {
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier.fillMaxSize()
+        ) {
+            Text(
+                text = label,
+                fontSize = 12.sp,
+                fontWeight = if (selected) FontWeight.Medium else FontWeight.Normal,
+                color = if (selected)
+                    MaterialTheme.colorScheme.onPrimaryContainer
+                else
+                    MaterialTheme.colorScheme.onSurfaceVariant
+            )
         }
     }
 }
