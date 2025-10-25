@@ -24,37 +24,40 @@ class HabitViewModel(private val repository: HabitRepository) : ViewModel() {
     }
 
     private fun loadInitialData() {
-        val initialHabits = listOf(
-            Habit(
-                id = UUID.randomUUID().toString(),
-                name = "Ejercicio matutino",
-                category = "Salud",
-                description = "Hacer 30 minutos de ejercicio cardiovascular",
-                time = "07:00",
-                priority = Priority.HIGH,
-                frequency = Frequency.DAILY,
-                startDate = "2025-01-01",
-                dailyGoal = "30 minutos",
-                additionalGoal = "Mejorar resistencia cardiovascular",
-                completed = false,
-                streak = 15
-            ),
-            Habit(
-                id = UUID.randomUUID().toString(),
-                name = "Leer antes de dormir",
-                category = "Aprendizaje",
-                description = "Lectura de 20 páginas diarias",
-                time = "22:00",
-                priority = Priority.MEDIUM,
-                frequency = Frequency.DAILY,
-                startDate = "2025-01-15",
-                dailyGoal = "20 páginas",
-                additionalGoal = "Completar 12 libros al año",
-                completed = true,
-                streak = 8
-            )
-        )
-        _habits.value = initialHabits
+//        val initialHabits = listOf(
+//            Habit(
+//                id = UUID.randomUUID().toString(),
+//                name = "Ejercicio matutino",
+//                category = "Salud",
+//                description = "Hacer 30 minutos de ejercicio cardiovascular",
+//                time = "07:00",
+//                priority = Priority.HIGH,
+//                frequency = Frequency.DAILY,
+//                startDate = "2025-01-01",
+//                dailyGoal = "30 minutos",
+//                additionalGoal = "Mejorar resistencia cardiovascular",
+//                completed = false,
+//                streak = 15
+//            ),
+//            Habit(
+//                id = UUID.randomUUID().toString(),
+//                name = "Leer antes de dormir",
+//                category = "Aprendizaje",
+//                description = "Lectura de 20 páginas diarias",
+//                time = "22:00",
+//                priority = Priority.MEDIUM,
+//                frequency = Frequency.DAILY,
+//                startDate = "2025-01-15",
+//                dailyGoal = "20 páginas",
+//                additionalGoal = "Completar 12 libros al año",
+//                completed = true,
+//                streak = 8
+//            )
+//        )
+        viewModelScope.launch {
+            var initialHabits = repository.getHabits()
+            _habits.value = initialHabits
+        }
     }
 
     fun addHabit(habit: Habit) {
@@ -74,12 +77,18 @@ class HabitViewModel(private val repository: HabitRepository) : ViewModel() {
             currentList[index] = habit
             _habits.value = currentList
         }
+        viewModelScope.launch {
+            repository.updateHabit(habit)
+        }
     }
 
     fun deleteHabit(id: String) {
         val currentList = _habits.value.toMutableList()
         currentList.removeAll { it.id == id }
         _habits.value = currentList
+        viewModelScope.launch {
+            repository.deleteHabit(id)
+        }
     }
 
     fun toggleCompleted(id: String) {
