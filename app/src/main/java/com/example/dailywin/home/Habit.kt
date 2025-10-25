@@ -1,7 +1,7 @@
-package com.example.dailywin.data.model
+package com.example.dailywin.home
 
 data class Habit(
-    val id: String = "",
+    val id: Long = 0,
     val name: String = "",
     val category: String = "",
     val description: String = "",

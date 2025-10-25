@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CheckCircle
@@ -52,10 +53,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.dailywin.data.firebase.FirebaseDataSource
-import com.example.dailywin.data.model.Habit
-import com.example.dailywin.data.model.Priority
-import com.example.dailywin.data.repository.HabitRepository
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -63,9 +60,7 @@ import java.time.format.DateTimeFormatter
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
-//    viewModel: HabitViewModel = viewModel()
-    viewModel: HabitViewModel = HabitViewModel(HabitRepository(FirebaseDataSource()))
-
+    viewModel: HabitViewModel = viewModel()
 ) {
     val habits by viewModel.habits.collectAsState()
 

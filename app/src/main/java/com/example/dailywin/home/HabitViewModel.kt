@@ -1,18 +1,11 @@
 package com.example.dailywin.home
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import com.example.dailywin.data.model.Frequency
-import com.example.dailywin.data.model.Habit
-import com.example.dailywin.data.model.Priority
-import com.example.dailywin.data.repository.HabitRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
-import java.util.UUID
 
-class HabitViewModel(private val repository: HabitRepository) : ViewModel() {
+class HabitViewModel : ViewModel() {
 
     private val _habits = MutableStateFlow<List<Habit>>(emptyList())
     val habits: StateFlow<List<Habit>> = _habits.asStateFlow()
@@ -26,7 +19,7 @@ class HabitViewModel(private val repository: HabitRepository) : ViewModel() {
     private fun loadInitialData() {
         val initialHabits = listOf(
             Habit(
-                id = UUID.randomUUID().toString(),
+                id = idCounter++,
                 name = "Ejercicio matutino",
                 category = "Salud",
                 description = "Hacer 30 minutos de ejercicio cardiovascular",
@@ -40,7 +33,7 @@ class HabitViewModel(private val repository: HabitRepository) : ViewModel() {
                 streak = 15
             ),
             Habit(
-                id = UUID.randomUUID().toString(),
+                id = idCounter++,
                 name = "Leer antes de dormir",
                 category = "Aprendizaje",
                 description = "Lectura de 20 páginas diarias",
@@ -58,13 +51,10 @@ class HabitViewModel(private val repository: HabitRepository) : ViewModel() {
     }
 
     fun addHabit(habit: Habit) {
-        val newHabit = habit.copy(id = UUID.randomUUID().toString(),)
+        val newHabit = habit.copy(id = idCounter++)
         val currentList = _habits.value.toMutableList()
         currentList.add(newHabit)
         _habits.value = currentList
-        viewModelScope.launch {
-            repository.addHabit(habit)
-        }
     }
 
     fun updateHabit(habit: Habit) {
@@ -76,13 +66,13 @@ class HabitViewModel(private val repository: HabitRepository) : ViewModel() {
         }
     }
 
-    fun deleteHabit(id: String) {
+    fun deleteHabit(id: Long) {
         val currentList = _habits.value.toMutableList()
         currentList.removeAll { it.id == id }
         _habits.value = currentList
     }
 
-    fun toggleCompleted(id: String) {
+    fun toggleCompleted(id: Long) {
         val currentList = _habits.value.toMutableList()
         val index = currentList.indexOfFirst { it.id == id }
         if (index != -1) {
@@ -96,7 +86,7 @@ class HabitViewModel(private val repository: HabitRepository) : ViewModel() {
         }
     }
 
-    fun getHabitById(id: String): Habit? {
+    fun getHabitById(id: Long): Habit? {
         return _habits.value.find { it.id == id }
     }
 }
