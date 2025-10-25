@@ -12,15 +12,21 @@ class FirebaseDataSource {
     suspend fun addHabit(habit: Habit){
         habitsCollection.document(habit.id).set(habit).await();
     }
-    suspend fun getHabits(): List<Habit>{
-        val snapshot = habitsCollection.get().await()
-        return snapshot.toObjects(Habit::class.java)
-    }
-    suspend fun updateHabit(habit: Habit){
-        habitsCollection.document(habit.id).set(habit).await()
-    }
 
-    suspend fun deleteHabit(habitId: String) {
-        habitsCollection.document(habitId).delete().await()
-    }
+//    suspend fun addUser(user: User) {
+//        usersCollection.document(user.id).set(user).await()
+//    }
+//
+//    suspend fun getUsers(): List<User> {
+//        val snapshot = usersCollection.get().await()
+//        return snapshot.toObjects(User::class.java)
+//    }
+//
+//    suspend fun updateUser(user: User) {
+//        usersCollection.document(user.id).set(user).await()
+//    }
+//
+//    suspend fun deleteUser(userId: String) {
+//        usersCollection.document(userId).delete().await()
+//    }
 }
