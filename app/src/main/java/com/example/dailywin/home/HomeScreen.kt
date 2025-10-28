@@ -17,13 +17,21 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.TrendingUp
 import androidx.compose.material.icons.outlined.Circle
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Divider
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -36,6 +44,9 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -53,7 +64,8 @@ import java.util.Locale
 fun HomeScreen(
     viewModel: HabitViewModel,
     onNavigateToCreate: () -> Unit = {},
-    onNavigateToDetail: (String) -> Unit = {},  // String en lugar de Long
+    onNavigateToDetail: (String) -> Unit = {},
+    onNavigateToEdit: (String) -> Unit = {},  // Nueva función para editar
     onNavigateToCalendar: () -> Unit = {},
     onNavigateToStats: () -> Unit = {}
 ) {
@@ -153,10 +165,12 @@ fun HomeScreen(
                 contentPadding = PaddingValues(vertical = 4.dp)
             ) {
                 items(habits) { habit ->
-                    HabitItemClean(
+                    HabitItemWithMenu(
                         habit = habit,
-                        onClick = { onNavigateToDetail(habit.id) },
-                        onToggleCompleted = { viewModel.toggleCompleted(habit.id) }
+                        onClick = { onNavigateToDetail(habit.id) },  // Va a detalle
+                        onToggleCompleted = { viewModel.toggleCompleted(habit.id) },
+                        onEdit = { onNavigateToEdit(habit.id) },  // Va a editar
+                        onDelete = { viewModel.deleteHabit(habit.id) }
                     )
                     Divider(
                         color = MaterialTheme.colorScheme.outlineVariant,
@@ -169,11 +183,15 @@ fun HomeScreen(
 }
 
 @Composable
-fun HabitItemClean(
+fun HabitItemWithMenu(
     habit: Habit,
     onClick: () -> Unit,
-    onToggleCompleted: () -> Unit
+    onToggleCompleted: () -> Unit,
+    onEdit: () -> Unit,
+    onDelete: () -> Unit
 ) {
+    var showMenu by remember { mutableStateOf(false) }
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -269,6 +287,65 @@ fun HabitItemClean(
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+            }
+        }
+
+        Box {
+            IconButton(onClick = { showMenu = !showMenu }) {
+                Icon(
+                    imageVector = Icons.Default.MoreVert,
+                    contentDescription = "Más opciones",
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
+            DropdownMenu(
+                expanded = showMenu,
+                onDismissRequest = { showMenu = false }
+            ) {
+                DropdownMenuItem(
+                    text = {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Edit,
+                                contentDescription = null,
+                                modifier = Modifier.size(20.dp)
+                            )
+                            Text("Editar")
+                        }
+                    },
+                    onClick = {
+                        showMenu = false
+                        onEdit()
+                    }
+                )
+
+                DropdownMenuItem(
+                    text = {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Delete,
+                                contentDescription = null,
+                                modifier = Modifier.size(20.dp),
+                                tint = MaterialTheme.colorScheme.error
+                            )
+                            Text(
+                                "Eliminar",
+                                color = MaterialTheme.colorScheme.error
+                            )
+                        }
+                    },
+                    onClick = {
+                        showMenu = false
+                        onDelete()
+                    }
                 )
             }
         }

@@ -1,7 +1,6 @@
 package com.example.dailywin.navigation
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.toLong
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -20,6 +19,9 @@ sealed class Screen(val route: String) {
     object Login : Screen("login")
     object Home : Screen("home")
     object CreateHabit : Screen("create_habit")
+    object EditHabit : Screen("edit_habit/{habitId}") {
+        fun createRoute(habitId: String) = "edit_habit/$habitId"
+    }
     object HabitDetail : Screen("habit_detail/{habitId}") {
         fun createRoute(habitId: String) = "habit_detail/$habitId"
     }
@@ -54,7 +56,10 @@ fun AppNavGraph(
                     navController.navigate(Screen.CreateHabit.route)
                 },
                 onNavigateToDetail = { habitId ->
-                    navController.navigate(Screen.HabitDetail.createRoute(habitId.toString()))
+                    navController.navigate(Screen.HabitDetail.createRoute(habitId))
+                },
+                onNavigateToEdit = { habitId ->
+                    navController.navigate(Screen.EditHabit.createRoute(habitId))
                 },
                 onNavigateToCalendar = {
                     navController.navigate(Screen.Calendar.route)
@@ -67,6 +72,7 @@ fun AppNavGraph(
 
         composable(Screen.CreateHabit.route) {
             CreateHabitScreen(
+                habit = null,
                 onSave = { habit ->
                     onHabitCreated(habit)
                     navController.popBackStack()
@@ -75,6 +81,29 @@ fun AppNavGraph(
                     navController.popBackStack()
                 }
             )
+        }
+
+        composable(
+            route = Screen.EditHabit.route,
+            arguments = listOf(
+                navArgument("habitId") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val habitId = backStackEntry.arguments?.getString("habitId") ?: ""
+            val habit = habitViewModel.getHabitById(habitId)
+
+            if (habit != null) {
+                CreateHabitScreen(
+                    habit = habit,
+                    onSave = { updatedHabit ->
+                        habitViewModel.updateHabit(updatedHabit)
+                        navController.popBackStack()
+                    },
+                    onCancel = {
+                        navController.popBackStack()
+                    }
+                )
+            }
         }
 
         composable(

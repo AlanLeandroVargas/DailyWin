@@ -1,5 +1,3 @@
-// UBICACIÓN: app/src/main/java/com/example/dailywin/home/HabitDetailReadOnlyScreen.kt
-
 package com.example.dailywin.home
 
 import androidx.compose.foundation.background

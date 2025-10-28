@@ -53,24 +53,24 @@ import java.util.Calendar
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CreateHabitScreen(
+    habit: Habit? = null,  // Si es null, es creación; si no, es edición
     onSave: (Habit) -> Unit,
     onCancel: () -> Unit
 ) {
-    var name by remember { mutableStateOf("") }
-    var category by remember { mutableStateOf("") }
-    var description by remember { mutableStateOf("") }
-    var time by remember { mutableStateOf("") }
-    var selectedPriority by remember { mutableStateOf(Priority.MEDIUM) }
-    var selectedFrequency by remember { mutableStateOf(Frequency.DAILY) }
-    var startDate by remember { mutableStateOf("") }
-    var endDate by remember { mutableStateOf("") }
-    var dailyGoal by remember { mutableStateOf("") }
-    var additionalGoal by remember { mutableStateOf("") }
+    var name by remember { mutableStateOf(habit?.name ?: "") }
+    var category by remember { mutableStateOf(habit?.category ?: "") }
+    var description by remember { mutableStateOf(habit?.description ?: "") }
+    var time by remember { mutableStateOf(habit?.time ?: "") }
+    var selectedPriority by remember { mutableStateOf(habit?.priority ?: Priority.MEDIUM) }
+    var selectedFrequency by remember { mutableStateOf(habit?.frequency ?: Frequency.DAILY) }
+    var startDate by remember { mutableStateOf(habit?.startDate ?: "") }
+    var endDate by remember { mutableStateOf(habit?.endDate ?: "") }
+    var dailyGoal by remember { mutableStateOf(habit?.dailyGoal ?: "") }
+    var additionalGoal by remember { mutableStateOf(habit?.additionalGoal ?: "") }
 
     val context = LocalContext.current
     val categories = listOf("Salud", "Productividad", "Finanzas", "Aprendizaje", "Relaciones", "Hobbies")
 
-    // DatePicker para fecha de inicio
     val startDatePicker = remember {
         val calendar = Calendar.getInstance()
         DatePickerDialog(
@@ -85,7 +85,6 @@ fun CreateHabitScreen(
         )
     }
 
-    // DatePicker para fecha de fin
     val endDatePicker = remember {
         val calendar = Calendar.getInstance()
         DatePickerDialog(
@@ -100,7 +99,6 @@ fun CreateHabitScreen(
         )
     }
 
-    // TimePicker para hora de recordatorio
     val timePicker = remember {
         val calendar = Calendar.getInstance()
         TimePickerDialog(
@@ -120,7 +118,7 @@ fun CreateHabitScreen(
             TopAppBar(
                 title = {
                     Text(
-                        text = "Nuevo hábito",
+                        text = if (habit == null) "Nuevo hábito" else "Editar hábito",
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Medium
                     )
@@ -137,8 +135,8 @@ fun CreateHabitScreen(
                     IconButton(
                         onClick = {
                             if (name.isNotBlank()) {
-                                val newHabit = Habit(
-                                    id = "0",
+                                val habitToSave = Habit(
+                                    id = habit?.id ?: "",  // Si es edición usa el id existente
                                     name = name,
                                     category = category,
                                     description = description,
@@ -150,10 +148,10 @@ fun CreateHabitScreen(
                                     endDate = endDate,
                                     dailyGoal = dailyGoal,
                                     additionalGoal = additionalGoal,
-                                    completed = false,
-                                    streak = 0
+                                    completed = habit?.completed ?: false,
+                                    streak = habit?.streak ?: 0
                                 )
-                                onSave(newHabit)
+                                onSave(habitToSave)
                             }
                         },
                         enabled = name.isNotBlank()
@@ -182,7 +180,6 @@ fun CreateHabitScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
-            // Nombre del hábito
             SectionTitle(text = "Información básica")
             OutlinedTextField(
                 value = name,
@@ -197,7 +194,6 @@ fun CreateHabitScreen(
                 )
             )
 
-            // Categoría
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(
                     text = "Categoría",
@@ -233,7 +229,6 @@ fun CreateHabitScreen(
                 }
             }
 
-            // Prioridad
             SectionTitle(text = "Prioridad")
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -249,7 +244,6 @@ fun CreateHabitScreen(
                 }
             }
 
-            // Frecuencia
             SectionTitle(text = "Frecuencia")
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -265,7 +259,6 @@ fun CreateHabitScreen(
                 }
             }
 
-            // Fechas
             SectionTitle(text = "Período")
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -306,7 +299,6 @@ fun CreateHabitScreen(
                 )
             }
 
-            // Hora de recordatorio
             SectionTitle(text = "Recordatorio")
             OutlinedTextField(
                 value = time,
@@ -325,7 +317,6 @@ fun CreateHabitScreen(
                 modifier = Modifier.fillMaxWidth()
             )
 
-            // Objetivos
             SectionTitle(text = "Objetivos")
             OutlinedTextField(
                 value = dailyGoal,
@@ -345,7 +336,6 @@ fun CreateHabitScreen(
                 singleLine = true
             )
 
-            // Notas
             SectionTitle(text = "Notas")
             OutlinedTextField(
                 value = description,
@@ -361,8 +351,6 @@ fun CreateHabitScreen(
         }
     }
 }
-
-// Componentes auxiliares
 
 @Composable
 fun SectionTitle(text: String) {
