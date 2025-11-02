@@ -2,6 +2,7 @@ package com.example.dailywin.data.model
 
 data class Habit(
     val id: String = "",
+    val userId: String = "",
     val name: String = "",
     val category: String = "",
     val description: String = "",
@@ -14,7 +15,7 @@ data class Habit(
     val dailyGoal: String = "",
     val additionalGoal: String = "",
     val completed: Boolean = false,
-    val streak: Int = 0
+    val streak: Int = 0,
 )
 
 enum class Priority {

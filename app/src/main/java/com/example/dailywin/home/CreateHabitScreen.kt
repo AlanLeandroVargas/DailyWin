@@ -42,13 +42,15 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.dailywin.data.model.Frequency
 import com.example.dailywin.data.model.Habit
 import com.example.dailywin.data.model.Priority
-import com.example.dailywin.data.model.Frequency
+import com.google.firebase.auth.FirebaseAuth
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import java.util.Calendar
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -135,8 +137,10 @@ fun CreateHabitScreen(
                     IconButton(
                         onClick = {
                             if (name.isNotBlank()) {
+                                val user = FirebaseAuth.getInstance().currentUser
                                 val habitToSave = Habit(
-                                    id = habit?.id ?: "",  // Si es edición usa el id existente
+                                    id = habit?.id ?: "",  // Si es edición usa el id existente,
+                                    userId = user?.uid ?: "",
                                     name = name,
                                     category = category,
                                     description = description,
