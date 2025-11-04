@@ -1,5 +1,7 @@
 package com.example.dailywin.home
 
+import android.app.DatePickerDialog
+import android.app.TimePickerDialog
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -10,17 +12,23 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.AddAPhoto
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
@@ -35,16 +43,19 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.dailywin.data.model.Frequency
 import com.example.dailywin.data.model.Habit
 import com.example.dailywin.data.model.Priority
+import com.google.firebase.auth.FirebaseAuth
 import java.time.LocalDate
-import java.util.UUID
+import java.time.LocalTime
+import java.time.format.DateTimeFormatter
+import java.util.Calendar
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -64,10 +75,55 @@ fun EditHabitScreen(
     var endDate by remember { mutableStateOf(habit?.endDate ?: LocalDate.now()) }
     var dailyGoal by remember { mutableStateOf(habit?.dailyGoal ?: "") }
     var additionalGoal by remember { mutableStateOf(habit?.additionalGoal ?: "") }
+    var imageUri by remember { mutableStateOf(habit?.imageUri ?: "") }
+    var location by remember { mutableStateOf(habit?.location ?: "") }
 
+    val context = LocalContext.current
     val categories = listOf("Salud", "Productividad", "Finanzas", "Aprendizaje", "Relaciones", "Hobbies")
-    val priorities = Priority.values()
-    val frequencies = Frequency.values()
+
+    val startDatePicker = remember {
+        val calendar = Calendar.getInstance()
+        DatePickerDialog(
+            context,
+            { _, year, month, day ->
+                val selectedDate = LocalDate.of(year, month + 1, day)
+                startDate = selectedDate
+//                startDate = selectedDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+            },
+            calendar.get(Calendar.YEAR),
+            calendar.get(Calendar.MONTH),
+            calendar.get(Calendar.DAY_OF_MONTH)
+        )
+    }
+
+    val endDatePicker = remember {
+        val calendar = Calendar.getInstance()
+        DatePickerDialog(
+            context,
+            { _, year, month, day ->
+                val selectedDate = LocalDate.of(year, month + 1, day)
+                endDate = selectedDate
+//                endDate = selectedDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+            },
+            calendar.get(Calendar.YEAR),
+            calendar.get(Calendar.MONTH),
+            calendar.get(Calendar.DAY_OF_MONTH)
+        )
+    }
+
+    val timePicker = remember {
+        val calendar = Calendar.getInstance()
+        TimePickerDialog(
+            context,
+            { _, hour, minute ->
+                val selectedTime = LocalTime.of(hour, minute)
+                time = selectedTime.format(DateTimeFormatter.ofPattern("HH:mm"))
+            },
+            calendar.get(Calendar.HOUR_OF_DAY),
+            calendar.get(Calendar.MINUTE),
+            true
+        )
+    }
 
     Scaffold(
         topBar = {
@@ -75,7 +131,7 @@ fun EditHabitScreen(
                 title = {
                     Text(
                         text = if (habit == null) "Nuevo hábito" else "Editar hábito",
-                        fontSize = 20.sp,
+                        fontSize = 18.sp,
                         fontWeight = FontWeight.Medium
                     )
                 },
@@ -90,8 +146,8 @@ fun EditHabitScreen(
                 actions = {
                     IconButton(
                         onClick = {
-                            if (name.isNotBlank()) {
-                                val habitToSave = habit?.copy(
+                            if (name.isNotBlank() && habit != null) {
+                                val habitToSave = habit.copy(
                                     name = name,
                                     category = category,
                                     description = description,
@@ -102,20 +158,9 @@ fun EditHabitScreen(
                                     endDate = endDate,
                                     dailyGoal = dailyGoal,
                                     additionalGoal = additionalGoal,
-                                    daysOfWeek = selectedDays
-                                ) ?: Habit(
-                                    id = UUID.randomUUID().toString(),
-                                    name = name,
-                                    category = category,
-                                    description = description,
-                                    time = time,
-                                    priority = selectedPriority,
-                                    frequency = selectedFrequency,
-                                    startDate = startDate,
-                                    endDate = endDate,
-                                    dailyGoal = dailyGoal,
-                                    additionalGoal = additionalGoal,
-                                    daysOfWeek = selectedDays
+                                    daysOfWeek = selectedDays,
+                                    imageUri = imageUri,
+                                    location = location
                                 )
                                 onSave(habitToSave)
                             }
@@ -146,71 +191,19 @@ fun EditHabitScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(
-                    text = "Nombre",
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Medium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+            SectionTitle(text = "Información básica")
+            OutlinedTextField(
+                value = name,
+                onValueChange = { name = it },
+                label = { Text("Nombre del hábito *") },
+                placeholder = { Text("Ej: Hacer ejercicio") },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true,
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = MaterialTheme.colorScheme.primary,
+                    unfocusedBorderColor = MaterialTheme.colorScheme.outline
                 )
-                OutlinedTextField(
-                    value = name,
-                    onValueChange = { name = it },
-                    placeholder = { Text("Ej: Hacer ejercicio") },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true,
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = MaterialTheme.colorScheme.primary,
-                        unfocusedBorderColor = MaterialTheme.colorScheme.outline
-                    )
-                )
-            }
-
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(
-                    text = "Prioridad",
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Medium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    priorities.forEach { priority ->
-                        PriorityChip(
-                            priority = priority,
-                            selected = selectedPriority == priority,
-                            onClick = { selectedPriority = priority },
-                            modifier = Modifier.weight(1f)
-                        )
-                    }
-                }
-
-                if (selectedFrequency == Frequency.WEEKLY) {
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        val days = listOf("L", "M", "X", "J", "V", "S", "D")
-                        days.forEach { day ->
-                            DayOfWeekChip(
-                                day = day,
-                                selected = selectedDays.contains(day),
-                                onClick = {
-                                    selectedDays = if (selectedDays.contains(day)) {
-                                        selectedDays - day
-                                    } else {
-                                        selectedDays + day
-                                    }
-                                },
-                                modifier = Modifier.weight(1f)
-                            )
-                        }
-                    }
-                }
-            }
+            )
 
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(
@@ -247,84 +240,175 @@ fun EditHabitScreen(
                 }
             }
 
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(
-                    text = "Frecuencia",
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Medium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+            SectionTitle(text = "Prioridad")
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Priority.values().forEach { priority ->
+                    PriorityChip(
+                        priority = priority,
+                        selected = selectedPriority == priority,
+                        onClick = { selectedPriority = priority },
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+            }
+
+            SectionTitle(text = "Frecuencia")
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Frequency.values().forEach { freq ->
+                    FrequencyChip(
+                        frequency = freq,
+                        selected = selectedFrequency == freq,
+                        onClick = { selectedFrequency = freq },
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+            }
+            if (selectedFrequency == Frequency.WEEKLY) {
+                Spacer(modifier = Modifier.height(16.dp))
+                SectionTitle(text = "Días de la semana")
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    frequencies.forEach { freq ->
-                        FrequencyChip(
-                            frequency = freq,
-                            selected = selectedFrequency == freq,
-                            onClick = { selectedFrequency = freq },
+                    val days = listOf("L", "M", "X", "J", "V", "S", "D")
+                    days.forEach { day ->
+                        DayOfWeekChip(
+                            day = day,
+                            selected = selectedDays.contains(day),
+                            onClick = {
+                                selectedDays = if (selectedDays.contains(day)) {
+                                    selectedDays - day
+                                } else {
+                                    selectedDays + day
+                                }
+                            },
                             modifier = Modifier.weight(1f)
                         )
                     }
                 }
             }
 
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(
-                    text = "Hora",
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Medium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+            SectionTitle(text = "Período")
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
                 OutlinedTextField(
-                    value = time,
-                    onValueChange = { time = it },
-                    placeholder = { Text("HH:MM") },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true,
+                    value = startDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")),
+                    onValueChange = {},
+                    label = { Text("Fecha de inicio") },
+                    placeholder = { Text("Seleccionar") },
+                    readOnly = true,
                     trailingIcon = {
-                        IconButton(onClick = { /* TODO: Open time picker */ }) {
+                        IconButton(onClick = { startDatePicker.show() }) {
                             Icon(
-                                imageVector = Icons.Default.Schedule,
-                                contentDescription = "Seleccionar hora"
+                                imageVector = Icons.Default.CalendarToday,
+                                contentDescription = "Seleccionar fecha"
                             )
                         }
+                    },
+                    modifier = Modifier.weight(1f)
+                )
+
+                OutlinedTextField(
+                    value = endDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")),
+                    onValueChange = {},
+                    label = { Text("Fecha de fin") },
+                    placeholder = { Text("Opcional") },
+                    readOnly = true,
+                    trailingIcon = {
+                        IconButton(onClick = { endDatePicker.show() }) {
+                            Icon(
+                                imageVector = Icons.Default.CalendarToday,
+                                contentDescription = "Seleccionar fecha"
+                            )
+                        }
+                    },
+                    modifier = Modifier.weight(1f)
+                )
+            }
+
+            SectionTitle(text = "Recordatorio")
+            OutlinedTextField(
+                value = time,
+                onValueChange = {},
+                label = { Text("Hora") },
+                placeholder = { Text("Seleccionar hora") },
+                readOnly = true,
+                trailingIcon = {
+                    IconButton(onClick = { timePicker.show() }) {
+                        Icon(
+                            imageVector = Icons.Default.Schedule,
+                            contentDescription = "Seleccionar hora"
+                        )
                     }
-                )
-            }
+                },
+                modifier = Modifier.fillMaxWidth()
+            )
 
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(
-                    text = "Objetivo diario",
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Medium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                OutlinedTextField(
-                    value = dailyGoal,
-                    onValueChange = { dailyGoal = it },
-                    placeholder = { Text("Ej: 30 minutos") },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true
-                )
-            }
+            SectionTitle(text = "Objetivos")
+            OutlinedTextField(
+                value = dailyGoal,
+                onValueChange = { dailyGoal = it },
+                label = { Text("Objetivo diario") },
+                placeholder = { Text("Ej: 30 minutos") },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true
+            )
 
-            // Descripción
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(
-                    text = "Notas",
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Medium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                OutlinedTextField(
-                    value = description,
-                    onValueChange = { description = it },
-                    placeholder = { Text("Agrega notas sobre este hábito") },
-                    modifier = Modifier.fillMaxWidth(),
-                    minLines = 3,
-                    maxLines = 5
-                )
+            OutlinedTextField(
+                value = additionalGoal,
+                onValueChange = { additionalGoal = it },
+                label = { Text("Objetivo adicional") },
+                placeholder = { Text("Ej: Perder 5kg en 3 meses") },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true
+            )
+
+            SectionTitle(text = "Notas")
+            OutlinedTextField(
+                value = description,
+                onValueChange = { description = it },
+                label = { Text("Descripción") },
+                placeholder = { Text("Agrega notas sobre este hábito") },
+                modifier = Modifier.fillMaxWidth(),
+                minLines = 3,
+                maxLines = 5
+            )
+
+            SectionTitle(text = "Extras")
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                OutlinedButton(
+                    onClick = { /* TODO: Implement camera logic */ },
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.AddAPhoto,
+                        contentDescription = "Agregar foto"
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Agregar foto")
+                }
+                OutlinedButton(
+                    onClick = { /* TODO: Implement location logic */ },
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.LocationOn,
+                        contentDescription = "Agregar ubicación"
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Agregar ubicación")
+                }
             }
 
             Spacer(modifier = Modifier.height(40.dp))
@@ -342,7 +426,6 @@ private fun DayOfWeekChip(
     Surface(
         modifier = modifier
             .height(40.dp)
-            .clip(RoundedCornerShape(20.dp))
             .clickable { onClick() },
         shape = RoundedCornerShape(20.dp),
         color = if (selected)
@@ -368,6 +451,16 @@ private fun DayOfWeekChip(
 }
 
 @Composable
+private fun SectionTitle(text: String) {
+    Text(
+        text = text,
+        fontSize = 16.sp,
+        fontWeight = FontWeight.SemiBold,
+        color = MaterialTheme.colorScheme.onSurface
+    )
+}
+
+@Composable
 private fun PriorityChip(
     priority: Priority,
     selected: Boolean,
@@ -375,9 +468,9 @@ private fun PriorityChip(
     modifier: Modifier = Modifier
 ) {
     val backgroundColor = when (priority) {
-        Priority.HIGH -> Color(0xFFE53935)
-        Priority.MEDIUM -> Color(0xFFFB8C00)
-        Priority.LOW -> Color(0xFF43A047)
+        Priority.HIGH -> androidx.compose.ui.graphics.Color(0xFFE53935)
+        Priority.MEDIUM -> androidx.compose.ui.graphics.Color(0xFFFB8C00)
+        Priority.LOW -> androidx.compose.ui.graphics.Color(0xFF43A047)
     }
 
     val label = when (priority) {
@@ -389,10 +482,9 @@ private fun PriorityChip(
     Surface(
         modifier = modifier
             .height(48.dp)
-            .clip(RoundedCornerShape(12.dp))
             .clickable { onClick() },
         shape = RoundedCornerShape(12.dp),
-        color = if (selected) backgroundColor else Color.Transparent,
+        color = if (selected) backgroundColor else androidx.compose.ui.graphics.Color.Transparent,
         border = androidx.compose.foundation.BorderStroke(
             width = 2.dp,
             color = backgroundColor
@@ -406,7 +498,7 @@ private fun PriorityChip(
                 text = label,
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Medium,
-                color = if (selected) Color.White else backgroundColor
+                color = if (selected) androidx.compose.ui.graphics.Color.White else backgroundColor
             )
         }
     }
@@ -422,7 +514,6 @@ private fun CategoryChip(
     Surface(
         modifier = modifier
             .height(40.dp)
-            .clip(RoundedCornerShape(20.dp))
             .clickable { onClick() },
         shape = RoundedCornerShape(20.dp),
         color = if (selected)

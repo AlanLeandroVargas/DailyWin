@@ -456,7 +456,7 @@ private fun DayOfWeekChip(
 }
 
 @Composable
-fun SectionTitle(text: String) {
+private fun SectionTitle(text: String) {
     Text(
         text = text,
         fontSize = 16.sp,
