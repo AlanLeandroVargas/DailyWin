@@ -67,11 +67,15 @@ class HabitViewModel(private val repository: HabitRepository) : ViewModel() {
         if (index != -1) {
             val habit = currentList[index]
             val newCompleted = !habit.completed
-            currentList[index] = habit.copy(
+            val updatedHabit = habit.copy(
                 completed = newCompleted,
                 streak = if (newCompleted) habit.streak + 1 else 0
             )
+            currentList[index] = updatedHabit
             _habits.value = currentList
+            viewModelScope.launch {
+                repository.updateHabit(updatedHabit)
+            }
         }
     }
 
