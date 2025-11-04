@@ -65,9 +65,10 @@ object NotificationUtils {
                 }
             }
             com.example.dailywin.data.model.Frequency.MONTHLY -> {
-                alarmManager.set(
+                alarmManager.setRepeating(
                     AlarmManager.RTC_WAKEUP,
                     calendar.timeInMillis,
+                    AlarmManager.INTERVAL_DAY * calendar.getActualMaximum(Calendar.DAY_OF_MONTH),
                     pendingIntent
                 )
             }

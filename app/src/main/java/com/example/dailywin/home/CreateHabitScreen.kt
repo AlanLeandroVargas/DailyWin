@@ -155,7 +155,6 @@ fun CreateHabitScreen(
                                     endDate = endDate,
                                     dailyGoal = dailyGoal,
                                     additionalGoal = additionalGoal,
-                                    completed = habit?.completed ?: false,
                                     streak = habit?.streak ?: 0,
                                     daysOfWeek = selectedDays
                                 )
@@ -284,7 +283,8 @@ fun CreateHabitScreen(
                                 } else {
                                     selectedDays + day
                                 }
-                            }
+                            },
+                            modifier = Modifier.weight(1f)
                         )
                     }
                 }
@@ -387,10 +387,11 @@ fun CreateHabitScreen(
 private fun DayOfWeekChip(
     day: String,
     selected: Boolean,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     Surface(
-        modifier = Modifier
+        modifier = modifier
             .height(40.dp)
             .clickable { onClick() },
         shape = RoundedCornerShape(20.dp),

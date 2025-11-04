@@ -18,6 +18,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.LocalFireDepartment
 import androidx.compose.material.icons.filled.Star
@@ -54,9 +55,10 @@ fun StatsScreen(
     onBack: () -> Unit
 ) {
     val habits by viewModel.habits.collectAsState()
+    val today = java.time.LocalDate.now()
 
     val totalHabits = habits.size
-    val completedToday = habits.count { it.completed }
+    val completedToday = habits.count { it.completedDates.contains(today) }
     val completionRate = if (totalHabits > 0) (completedToday.toFloat() / totalHabits * 100).toInt() else 0
     val longestStreak = habits.maxOfOrNull { it.streak } ?: 0
     val totalStreak = habits.sumOf { it.streak }
@@ -275,6 +277,91 @@ fun StatBox(
 }
 
 @Composable
+fun WeeklyProgressCard(habit: Habit) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Text(
+                text = "Progreso de la semana",
+                fontSize = 16.sp,
+                fontWeight = FontWeight.SemiBold
+            )
+
+            val days = listOf("L", "M", "X", "J", "V", "S", "D")
+            val today = java.time.LocalDate.now()
+            val weekStart = today.minusDays(today.dayOfWeek.value - 1L)
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                days.forEachIndexed { index, day ->
+                    val date = weekStart.plusDays(index.toLong())
+                    DayCircle(
+                        day = day,
+                        completed = habit.completedDates.contains(date),
+                        color = getPriorityColor(habit.priority)
+                    )
+                }
+            }
+
+            val completedInWeek = (0..6).count {
+                habit.completedDates.contains(weekStart.plusDays(it.toLong()))
+            }
+
+            Text(
+                text = "$completedInWeek de 7 días completados esta semana",
+                fontSize = 12.sp,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
+}
+
+@Composable
+fun DayCircle(
+    day: String,
+    completed: Boolean,
+    color: Color
+) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
+        Box(
+            modifier = Modifier
+                .size(40.dp)
+                .clip(CircleShape)
+                .background(
+                    if (completed) color else MaterialTheme.colorScheme.surfaceVariant
+                ),
+            contentAlignment = Alignment.Center
+        ) {
+            if (completed) {
+                Icon(
+                    imageVector = Icons.Default.CheckCircle,
+                    contentDescription = "Completado",
+                    tint = Color.White,
+                    modifier = Modifier.size(20.dp)
+                )
+            }
+        }
+        Text(
+            text = day,
+            fontSize = 10.sp,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    }
+}
+
+@Composable
 fun HabitsProgressCard(habits: List<Habit>, viewModel: HabitViewModel) {
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -315,7 +402,7 @@ fun HabitsProgressCard(habits: List<Habit>, viewModel: HabitViewModel) {
 }
 
 @Composable
-private fun HabitProgressItem(habit: Habit, viewModel: HabitViewModel) {
+fun HabitProgressItem(habit: Habit, viewModel: HabitViewModel) {
     val weeklyProgress = viewModel.getWeeklyProgress(habit)
     Column(
         modifier = Modifier.fillMaxWidth(),
@@ -371,6 +458,8 @@ private fun HabitProgressItem(habit: Habit, viewModel: HabitViewModel) {
             color = getPriorityColor(habit.priority),
             trackColor = MaterialTheme.colorScheme.surfaceVariant
         )
+        Spacer(modifier = Modifier.height(8.dp))
+        WeeklyProgressCard(habit = habit)
     }
 }
 

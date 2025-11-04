@@ -65,11 +65,12 @@ fun HomeScreen(
     viewModel: HabitViewModel,
     onNavigateToCreate: () -> Unit = {},
     onNavigateToDetail: (String) -> Unit = {},
-    onNavigateToEdit: (String) -> Unit = {},  // Nueva función para editar
+    onNavigateToEdit: (String) -> Unit = {},
     onNavigateToCalendar: () -> Unit = {},
     onNavigateToStats: () -> Unit = {}
 ) {
     val habits by viewModel.habits.collectAsState()
+    val today = LocalDate.now()
 
     Scaffold(
         topBar = {
@@ -167,6 +168,7 @@ fun HomeScreen(
                 items(habits) { habit ->
                     HabitItemWithMenu(
                         habit = habit,
+                        today = today,
                         onClick = { onNavigateToDetail(habit.id) },
                         onToggleCompleted = { viewModel.toggleCompleted(habit.id, habit.startDate) },
                         onEdit = { onNavigateToEdit(habit.id) },
@@ -185,12 +187,14 @@ fun HomeScreen(
 @Composable
 fun HabitItemWithMenu(
     habit: Habit,
+    today: LocalDate,
     onClick: () -> Unit,
     onToggleCompleted: () -> Unit,
     onEdit: () -> Unit,
     onDelete: () -> Unit
 ) {
     var showMenu by remember { mutableStateOf(false) }
+    val isCompletedToday = habit.completedDates.contains(today)
 
     Row(
         modifier = Modifier
@@ -206,7 +210,7 @@ fun HabitItemWithMenu(
                 .size(28.dp)
                 .clip(CircleShape)
                 .background(
-                    if (habit.completed)
+                    if (isCompletedToday)
                         MaterialTheme.colorScheme.primary
                     else
                         Color.Transparent
@@ -214,7 +218,7 @@ fun HabitItemWithMenu(
                 .clickable { onToggleCompleted() },
             contentAlignment = Alignment.Center
         ) {
-            if (habit.completed) {
+            if (isCompletedToday) {
                 Icon(
                     imageVector = Icons.Default.CheckCircle,
                     contentDescription = "Completado",
@@ -240,7 +244,7 @@ fun HabitItemWithMenu(
                 text = habit.name,
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Normal,
-                color = if (habit.completed)
+                color = if (isCompletedToday)
                     MaterialTheme.colorScheme.onSurfaceVariant
                 else
                     MaterialTheme.colorScheme.onSurface

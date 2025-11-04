@@ -9,7 +9,6 @@ import androidx.navigation.navArgument
 import com.example.dailywin.data.model.Habit
 import com.example.dailywin.home.CalendarScreen
 import com.example.dailywin.home.CreateHabitScreen
-import com.example.dailywin.home.HabitDetailReadOnlyScreen
 import com.example.dailywin.home.HabitViewModel
 import com.example.dailywin.home.HomeScreen
 import com.example.dailywin.home.StatsScreen
@@ -102,23 +101,6 @@ fun AppNavGraph(
                     onCancel = {
                         navController.popBackStack()
                     }
-                )
-            }
-        }
-
-        composable(
-            route = Screen.HabitDetail.route,
-            arguments = listOf(
-                navArgument("habitId") { type = NavType.StringType }
-            )
-        ) { backStackEntry ->
-            val habitId = backStackEntry.arguments?.getString("habitId") ?: ""
-            val habit = habitViewModel.getHabitById(habitId)
-
-            if (habit != null) {
-                HabitDetailReadOnlyScreen(
-                    habit = habit,
-                    onBack = { navController.popBackStack() }
                 )
             }
         }

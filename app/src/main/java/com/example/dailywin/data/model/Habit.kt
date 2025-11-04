@@ -18,7 +18,6 @@ data class Habit(
     val endDate: LocalDate = LocalDate.now(),
     val dailyGoal: String = "",
     val additionalGoal: String = "",
-    val completed: Boolean = false,
     val streak: Int = 0,
     val daysOfWeek: List<String> = emptyList(),
     val completedDates: List<LocalDate> = emptyList()
@@ -38,7 +37,6 @@ data class Habit(
             endDate = this.endDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")),
             dailyGoal = this.dailyGoal,
             additionalGoal = this.additionalGoal,
-            completed = this.completed,
             streak = this.streak,
             daysOfWeek = this.daysOfWeek,
             completedDates = this.completedDates.map { it.toString() }
