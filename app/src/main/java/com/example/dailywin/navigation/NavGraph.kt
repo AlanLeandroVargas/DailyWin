@@ -133,7 +133,7 @@ fun AppNavGraph(
             CalendarScreen(
                 viewModel = habitViewModel,
                 onBack = { navController.popBackStack() },
-                onNavigateToEdit = { habitId ->
+                onNavigateToEdit = { habitId: String ->
                     navController.navigate(Screen.EditHabit.createRoute(habitId))
                 }
             )

@@ -1,5 +1,6 @@
 package com.example.dailywin.home
 
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -11,15 +12,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.LocalFireDepartment
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.TrendingUp
@@ -31,7 +29,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -45,23 +42,24 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.dailywin.data.model.Habit
+import java.time.LocalDate
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun StatsScreen(
-    viewModel: HabitViewModel = viewModel(),
+    viewModel: HabitViewModel,
     onBack: () -> Unit
 ) {
     val habits by viewModel.habits.collectAsState()
-    val today = java.time.LocalDate.now()
+    val today = LocalDate.now()
 
-    val totalHabits = habits.size
-    val completedToday = habits.count { it.completedDates.contains(today) }
-    val completionRate = if (totalHabits > 0) (completedToday.toFloat() / totalHabits * 100).toInt() else 0
+    val habitsDueToday = habits.filter { viewModel.isHabitDueOnDate(it, today) }
+    val totalHabitsDueToday = habitsDueToday.size
+    val completedToday = habitsDueToday.count { it.completedDates.contains(today) }
+    val completionRate = if (totalHabitsDueToday > 0) completedToday.toFloat() / totalHabitsDueToday else 0f
     val longestStreak = habits.maxOfOrNull { it.streak } ?: 0
-    val totalStreak = habits.sumOf { it.streak }
+    val totalDaysTracked = habits.sumOf { it.completedDates.size }
 
     Scaffold(
         topBar = {
@@ -96,15 +94,15 @@ fun StatsScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             TodayCard(
-                totalHabits = totalHabits,
+                totalHabits = totalHabitsDueToday,
                 completedToday = completedToday,
                 completionRate = completionRate
             )
 
             GeneralStatsCard(
                 longestStreak = longestStreak,
-                totalStreak = totalStreak,
-                totalHabits = totalHabits
+                totalStreak = totalDaysTracked,
+                totalHabits = habits.size
             )
 
             HabitsProgressCard(habits = habits, viewModel = viewModel)
@@ -122,8 +120,10 @@ fun StatsScreen(
 fun TodayCard(
     totalHabits: Int,
     completedToday: Int,
-    completionRate: Int
+    completionRate: Float
 ) {
+    val animatedProgress by animateFloatAsState(targetValue = completionRate, label = "progressAnimation")
+
     Card(
         modifier = Modifier.fillMaxWidth(),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
@@ -165,7 +165,7 @@ fun TodayCard(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = "$completionRate%",
+                        text = "${(animatedProgress * 100).toInt()}%",
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color.White
@@ -174,7 +174,7 @@ fun TodayCard(
             }
 
             LinearProgressIndicator(
-                progress = completionRate / 100f,
+                progress = animatedProgress,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(8.dp)
@@ -185,7 +185,6 @@ fun TodayCard(
         }
     }
 }
-
 @Composable
 fun GeneralStatsCard(
     longestStreak: Int,
@@ -277,91 +276,6 @@ fun StatBox(
 }
 
 @Composable
-fun WeeklyProgressCard(habit: Habit) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            Text(
-                text = "Progreso de la semana",
-                fontSize = 16.sp,
-                fontWeight = FontWeight.SemiBold
-            )
-
-            val days = listOf("L", "M", "X", "J", "V", "S", "D")
-            val today = java.time.LocalDate.now()
-            val weekStart = today.minusDays(today.dayOfWeek.value - 1L)
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                days.forEachIndexed { index, day ->
-                    val date = weekStart.plusDays(index.toLong())
-                    DayCircle(
-                        day = day,
-                        completed = habit.completedDates.contains(date),
-                        color = getPriorityColor(habit.priority)
-                    )
-                }
-            }
-
-            val completedInWeek = (0..6).count {
-                habit.completedDates.contains(weekStart.plusDays(it.toLong()))
-            }
-
-            Text(
-                text = "$completedInWeek de 7 días completados esta semana",
-                fontSize = 12.sp,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
-    }
-}
-
-@Composable
-fun DayCircle(
-    day: String,
-    completed: Boolean,
-    color: Color
-) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(4.dp)
-    ) {
-        Box(
-            modifier = Modifier
-                .size(40.dp)
-                .clip(CircleShape)
-                .background(
-                    if (completed) color else MaterialTheme.colorScheme.surfaceVariant
-                ),
-            contentAlignment = Alignment.Center
-        ) {
-            if (completed) {
-                Icon(
-                    imageVector = Icons.Default.CheckCircle,
-                    contentDescription = "Completado",
-                    tint = Color.White,
-                    modifier = Modifier.size(20.dp)
-                )
-            }
-        }
-        Text(
-            text = day,
-            fontSize = 10.sp,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-    }
-}
-
-@Composable
 fun HabitsProgressCard(habits: List<Habit>, viewModel: HabitViewModel) {
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -403,7 +317,13 @@ fun HabitsProgressCard(habits: List<Habit>, viewModel: HabitViewModel) {
 
 @Composable
 fun HabitProgressItem(habit: Habit, viewModel: HabitViewModel) {
-    val weeklyProgress = viewModel.getWeeklyProgress(habit)
+    val completionRate = if (habit.completedDates.isNotEmpty()) {
+        habit.completedDates.size.toFloat() / (LocalDate.now().toEpochDay() - habit.startDate.toEpochDay() + 1).toFloat()
+    } else {
+        0f
+    }
+    val animatedProgress by animateFloatAsState(targetValue = completionRate, label = "habitProgressAnimation")
+
     Column(
         modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(4.dp)
@@ -450,7 +370,7 @@ fun HabitProgressItem(habit: Habit, viewModel: HabitViewModel) {
         }
 
         LinearProgressIndicator(
-            progress = weeklyProgress,
+            progress = animatedProgress,
             modifier = Modifier
                 .fillMaxWidth()
                 .height(6.dp)
@@ -458,8 +378,6 @@ fun HabitProgressItem(habit: Habit, viewModel: HabitViewModel) {
             color = getPriorityColor(habit.priority),
             trackColor = MaterialTheme.colorScheme.surfaceVariant
         )
-        Spacer(modifier = Modifier.height(8.dp))
-        WeeklyProgressCard(habit = habit)
     }
 }
 
@@ -503,7 +421,8 @@ fun CategoryItem(
     count: Int,
     total: Int
 ) {
-    val percentage = (count.toFloat() / total * 100).toInt()
+    val percentage = if (total > 0) count.toFloat() / total else 0f
+    val animatedProgress by animateFloatAsState(targetValue = percentage, label = "categoryProgressAnimation")
 
     Column(
         modifier = Modifier.fillMaxWidth(),
@@ -520,14 +439,14 @@ fun CategoryItem(
                 fontWeight = FontWeight.Medium
             )
             Text(
-                text = "$count hábitos ($percentage%)",
+                text = "$count hábitos (${(animatedProgress * 100).toInt()}%)",
                 fontSize = 12.sp,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
 
         LinearProgressIndicator(
-            progress = percentage / 100f,
+            progress = animatedProgress,
             modifier = Modifier
                 .fillMaxWidth()
                 .height(6.dp)

@@ -89,24 +89,21 @@ fun EditHabitScreen(
                 actions = {
                     IconButton(
                         onClick = {
-                            if (name.isNotBlank()) {
-                                val newHabit = Habit(
-                                    id = habit?.id ?: UUID.randomUUID().toString(),
+                            if (name.isNotBlank() && habit != null) {
+                                val updatedHabit = habit.copy(
                                     name = name,
                                     category = category,
                                     description = description,
                                     time = time,
-                                    reminders = habit?.reminders ?: emptyList(),
                                     priority = selectedPriority,
                                     frequency = selectedFrequency,
                                     startDate = startDate,
                                     endDate = endDate,
                                     dailyGoal = dailyGoal,
                                     additionalGoal = additionalGoal,
-                                    streak = habit?.streak ?: 0,
                                     daysOfWeek = selectedDays
                                 )
-                                onSave(newHabit)
+                                onSave(updatedHabit)
                             }
                         },
                         enabled = name.isNotBlank()
@@ -178,7 +175,8 @@ fun EditHabitScreen(
             }
             if (selectedFrequency == Frequency.WEEKLY) {
                 Spacer(modifier = Modifier.height(16.dp))
-                SectionTitle(text = "Días de la semana")
+                // SectionTitle is not defined in this file. I will comment it out.
+                // SectionTitle(text = "Días de la semana")
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)

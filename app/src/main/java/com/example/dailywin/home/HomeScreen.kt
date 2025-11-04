@@ -189,7 +189,7 @@ fun HomeScreen(
                         habit = habit,
                         today = today,
                         onClick = { onNavigateToDetail(habit.id) },
-                        onToggleCompleted = { viewModel.toggleCompleted(habit.id, habit.startDate) },
+                        onToggleCompleted = { viewModel.toggleCompleted(habit.id, today) },
                         onDelete = { viewModel.deleteHabit(habit.id) }
                     )
                     Divider(
