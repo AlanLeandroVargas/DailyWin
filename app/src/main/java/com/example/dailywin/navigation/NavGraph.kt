@@ -163,7 +163,8 @@ fun AppNavGraph(
                     },
                     onBack = {
                         navController.popBackStack()
-                    }
+                    },
+                    viewModel = habitViewModel
                 )
             }
         }

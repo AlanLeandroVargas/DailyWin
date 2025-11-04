@@ -38,6 +38,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import co.yml.charts.axis.AxisData
+import co.yml.charts.common.model.Point
+import co.yml.charts.ui.barchart.BarChart
+import co.yml.charts.ui.barchart.models.BarChartData
+import co.yml.charts.ui.barchart.models.BarData
 import com.example.dailywin.data.model.Habit
 import java.time.DayOfWeek
 import java.time.LocalDate
@@ -50,13 +55,16 @@ import java.util.Locale
 fun HabitDetailScreen(
     habit: Habit,
     onNavigateToEdit: (String) -> Unit,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    viewModel: HabitViewModel
 ) {
     val completionRate = if (habit.completedDates.isNotEmpty()) {
         habit.completedDates.size.toFloat() / (LocalDate.now().toEpochDay() - habit.startDate.toEpochDay() + 1).toFloat()
     } else {
         0f
     }
+
+    val weeklyCompletionData = viewModel.getWeeklyCompletionData(habit)
 
     Scaffold(
         topBar = {
@@ -142,8 +150,57 @@ fun HabitDetailScreen(
                 Text(text = habit.description)
             }
 
+            WeeklyCompletionChart(weeklyCompletionData)
             CalendarView(completedDates = habit.completedDates)
         }
+    }
+}
+
+@Composable
+fun WeeklyCompletionChart(weeklyCompletionData: List<Float>) {
+    val daysOfWeek = remember {
+        (0..6).map { i ->
+            LocalDate.now().minusDays(i.toLong()).dayOfWeek.getDisplayName(TextStyle.SHORT, Locale("es", "ES"))
+        }.reversed()
+    }
+
+    val barData = weeklyCompletionData.mapIndexed { index, value ->
+        BarData(
+            point = Point(index.toFloat(), value),
+            label = daysOfWeek[index]
+        )
+    }
+
+    val xAxisData = AxisData.Builder()
+        .axisStepSize(30.dp)
+        .steps(barData.size - 1)
+        .startDrawPadding(40.dp)
+        .labelData { index -> daysOfWeek[index] }
+        .build()
+
+    val yAxisData = AxisData.Builder()
+        .steps(1)
+        .labelData { index -> if (index == 0) "No" else "Sí" }
+        .build()
+
+    val barChartData = BarChartData(
+        chartData = barData,
+        xAxisData = xAxisData,
+        yAxisData = yAxisData
+    )
+
+    Column {
+        Text(
+            text = "Progreso Semanal",
+            fontSize = 18.sp,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.secondary
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        BarChart(
+            modifier = Modifier.height(200.dp),
+            barChartData = barChartData
+        )
     }
 }
 
@@ -174,7 +231,6 @@ fun CalendarView(completedDates: List<LocalDate>) {
             }
         }
         Spacer(modifier = Modifier.height(8.dp))
-        // This is a simplified calendar view. A more robust implementation would use a grid layout.
         val calendarRows = (daysInMonth + firstDayOfWeek - 1) / 7 + 1
         var dayCounter = 1
         repeat(calendarRows) {

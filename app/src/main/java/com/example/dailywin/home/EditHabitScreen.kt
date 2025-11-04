@@ -89,8 +89,21 @@ fun EditHabitScreen(
                 actions = {
                     IconButton(
                         onClick = {
-                            if (name.isNotBlank() && habit != null) {
-                                val updatedHabit = habit.copy(
+                            if (name.isNotBlank()) {
+                                val habitToSave = habit?.copy(
+                                    name = name,
+                                    category = category,
+                                    description = description,
+                                    time = time,
+                                    priority = selectedPriority,
+                                    frequency = selectedFrequency,
+                                    startDate = startDate,
+                                    endDate = endDate,
+                                    dailyGoal = dailyGoal,
+                                    additionalGoal = additionalGoal,
+                                    daysOfWeek = selectedDays
+                                ) ?: Habit(
+                                    id = UUID.randomUUID().toString(),
                                     name = name,
                                     category = category,
                                     description = description,
@@ -103,7 +116,7 @@ fun EditHabitScreen(
                                     additionalGoal = additionalGoal,
                                     daysOfWeek = selectedDays
                                 )
-                                onSave(updatedHabit)
+                                onSave(habitToSave)
                             }
                         },
                         enabled = name.isNotBlank()
@@ -175,8 +188,6 @@ fun EditHabitScreen(
             }
             if (selectedFrequency == Frequency.WEEKLY) {
                 Spacer(modifier = Modifier.height(16.dp))
-                // SectionTitle is not defined in this file. I will comment it out.
-                // SectionTitle(text = "Días de la semana")
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
