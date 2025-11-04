@@ -111,7 +111,6 @@ class HabitViewModel(private val repository: HabitRepository, private val contex
         var streak = 0
         var currentDate = LocalDate.now()
 
-        // If the habit was not completed today, but it was due, the streak is 0
         if (!completedDates.contains(currentDate) && isHabitDueOnDate(habit, currentDate)) {
             return 0
         }
@@ -121,7 +120,7 @@ class HabitViewModel(private val repository: HabitRepository, private val contex
                 if (date == currentDate) {
                     streak++
                     currentDate = currentDate.minusDays(1)
-                } else {
+                } else if (date.isBefore(currentDate)) {
                     break
                 }
             } else {
@@ -133,10 +132,11 @@ class HabitViewModel(private val repository: HabitRepository, private val contex
 
     fun getWeeklyCompletionData(habit: Habit): List<Float> {
         val today = LocalDate.now()
+        val weekStart = today.with(DayOfWeek.MONDAY)
         return (0..6).map { i ->
-            val date = today.minusDays(i.toLong())
+            val date = weekStart.plusDays(i.toLong())
             if (habit.completedDates.contains(date)) 1f else 0f
-        }.reversed()
+        }
     }
 
     fun getHabitById(id: String): Habit? {

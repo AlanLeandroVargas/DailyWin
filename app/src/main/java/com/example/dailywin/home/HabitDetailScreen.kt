@@ -11,21 +11,27 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.CalendarToday
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Schedule
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.TrendingUp
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -38,15 +44,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import co.yml.charts.axis.AxisData
-import co.yml.charts.common.model.Point
-import co.yml.charts.ui.barchart.BarChart
-import co.yml.charts.ui.barchart.models.BarChartData
-import co.yml.charts.ui.barchart.models.BarData
 import com.example.dailywin.data.model.Habit
+import com.example.dailywin.data.model.Priority
+import com.example.dailywin.data.model.Frequency
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.YearMonth
+import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle
 import java.util.Locale
 
@@ -54,18 +58,10 @@ import java.util.Locale
 @Composable
 fun HabitDetailScreen(
     habit: Habit,
-    onNavigateToEdit: (String) -> Unit,
     onBack: () -> Unit,
+    onNavigateToEdit: (String) -> Unit,
     viewModel: HabitViewModel
 ) {
-    val completionRate = if (habit.completedDates.isNotEmpty()) {
-        habit.completedDates.size.toFloat() / (LocalDate.now().toEpochDay() - habit.startDate.toEpochDay() + 1).toFloat()
-    } else {
-        0f
-    }
-
-    val weeklyCompletionData = viewModel.getWeeklyCompletionData(habit)
-
     Scaffold(
         topBar = {
             TopAppBar(
@@ -104,103 +100,373 @@ fun HabitDetailScreen(
                 .padding(paddingValues)
                 .verticalScroll(rememberScrollState())
                 .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(24.dp)
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-                shape = RoundedCornerShape(16.dp)
-            ) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Text(
-                        text = "Estadísticas del Hábito",
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Text(text = "Racha actual:", fontWeight = FontWeight.Bold)
-                        Text(text = "${habit.streak} días")
-                    }
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Text(text = "Tasa de finalización:", fontWeight = FontWeight.Bold)
-                        Text(text = "${(completionRate * 100).toInt()}%")
-                    }
-                    Spacer(modifier = Modifier.height(8.dp))
-                    LinearProgressIndicator(
-                        progress = completionRate,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(8.dp)
-                            .clip(RoundedCornerShape(4.dp))
-                    )
-                }
+            StatsCard(habit = habit)
+            InfoCard(habit = habit)
+            WeeklyProgressCard(habit = habit, viewModel = viewModel)
+            CalendarView(completedDates = habit.completedDates)
+
+            if (habit.dailyGoal.isNotBlank() || habit.additionalGoal.isNotBlank()) {
+                GoalsCard(habit = habit)
             }
 
             if (habit.description.isNotBlank()) {
-                Text(text = "Descripción:", fontWeight = FontWeight.Bold)
-                Text(text = habit.description)
+                NotesCard(description = habit.description)
             }
 
-            WeeklyCompletionChart(weeklyCompletionData)
-            CalendarView(completedDates = habit.completedDates)
+            Spacer(modifier = Modifier.height(24.dp))
         }
     }
 }
 
 @Composable
-fun WeeklyCompletionChart(weeklyCompletionData: List<Float>) {
-    val daysOfWeek = remember {
-        (0..6).map { i ->
-            LocalDate.now().minusDays(i.toLong()).dayOfWeek.getDisplayName(TextStyle.SHORT, Locale("es", "ES"))
-        }.reversed()
-    }
-
-    val barData = weeklyCompletionData.mapIndexed { index, value ->
-        BarData(
-            point = Point(index.toFloat(), value),
-            label = daysOfWeek[index]
+fun StatsCard(habit: Habit) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = getPriorityColor(habit.priority).copy(alpha = 0.1f)
         )
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(20.dp),
+            horizontalArrangement = Arrangement.SpaceEvenly,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            StatItem(
+                icon = Icons.Default.TrendingUp,
+                value = "${habit.streak}",
+                label = "Días de racha",
+                color = getPriorityColor(habit.priority)
+            )
+
+            StatItem(
+                icon = Icons.Default.CheckCircle,
+                value = if (habit.completedDates.contains(LocalDate.now())) "Sí" else "No",
+                label = "Completado hoy",
+                color = if (habit.completedDates.contains(LocalDate.now()))
+                    Color(0xFF43A047)
+                else
+                    MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
     }
+}
 
-    val xAxisData = AxisData.Builder()
-        .axisStepSize(30.dp)
-        .steps(barData.size - 1)
-        .startDrawPadding(40.dp)
-        .labelData { index -> daysOfWeek[index] }
-        .build()
-
-    val yAxisData = AxisData.Builder()
-        .steps(1)
-        .labelData { index -> if (index == 0) "No" else "Sí" }
-        .build()
-
-    val barChartData = BarChartData(
-        chartData = barData,
-        xAxisData = xAxisData,
-        yAxisData = yAxisData
-    )
-
-    Column {
+@Composable
+fun StatItem(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    value: String,
+    label: String,
+    color: Color
+) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        Box(
+            modifier = Modifier
+                .size(56.dp)
+                .clip(CircleShape)
+                .background(color.copy(alpha = 0.2f)),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = color,
+                modifier = Modifier.size(28.dp)
+            )
+        }
         Text(
-            text = "Progreso Semanal",
-            fontSize = 18.sp,
+            text = value,
+            fontSize = 24.sp,
             fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.secondary
+            color = color
         )
-        Spacer(modifier = Modifier.height(16.dp))
-        BarChart(
-            modifier = Modifier.height(200.dp),
-            barChartData = barChartData
+        Text(
+            text = label,
+            fontSize = 12.sp,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
+    }
+}
+
+@Composable
+fun InfoCard(habit: Habit) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Text(
+                text = "Información",
+                fontSize = 16.sp,
+                fontWeight = FontWeight.SemiBold
+            )
+
+            if (habit.category.isNotBlank()) {
+                InfoRow(
+                    icon = Icons.Default.Star,
+                    label = "Categoría",
+                    value = habit.category
+                )
+            }
+
+            if (habit.time.isNotBlank()) {
+                InfoRow(
+                    icon = Icons.Default.Schedule,
+                    label = "Hora",
+                    value = habit.time
+                )
+            }
+
+            InfoRow(
+                icon = Icons.Default.CalendarToday,
+                label = "Frecuencia",
+                value = when (habit.frequency) {
+                    Frequency.DAILY -> "Diaria"
+                    Frequency.WEEKLY -> "Semanal"
+                    Frequency.MONTHLY -> "Mensual"
+                }
+            )
+
+            InfoRow(
+                icon = Icons.Default.CalendarToday,
+                label = "Fecha de inicio",
+                value = habit.startDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+            )
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Prioridad:",
+                    fontSize = 14.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.width(120.dp)
+                )
+                Surface(
+                    color = getPriorityColor(habit.priority),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Text(
+                        text = when (habit.priority) {
+                            Priority.HIGH -> "Alta"
+                            Priority.MEDIUM -> "Media"
+                            Priority.LOW -> "Baja"
+                        },
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun InfoRow(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    label: String,
+    value: String
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.size(20.dp)
+        )
+        Spacer(modifier = Modifier.width(12.dp))
+        Text(
+            text = "$label:",
+            fontSize = 14.sp,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.width(100.dp)
+        )
+        Text(
+            text = value,
+            fontSize = 14.sp,
+            fontWeight = FontWeight.Medium
+        )
+    }
+}
+
+@Composable
+fun WeeklyProgressCard(habit: Habit, viewModel: HabitViewModel) {
+    val weeklyCompletionData = viewModel.getWeeklyCompletionData(habit)
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Text(
+                text = "Progreso de la semana",
+                fontSize = 16.sp,
+                fontWeight = FontWeight.SemiBold
+            )
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                val days = listOf("L", "M", "X", "J", "V", "S", "D")
+
+                days.forEachIndexed { index, day ->
+                    DayCircle(
+                        day = day,
+                        completed = weeklyCompletionData[index] == 1f,
+                        color = getPriorityColor(habit.priority)
+                    )
+                }
+            }
+
+            Text(
+                text = "${weeklyCompletionData.count { it == 1f }} de 7 días completados esta semana",
+                fontSize = 12.sp,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
+}
+
+@Composable
+fun DayCircle(
+    day: String,
+    completed: Boolean,
+    color: Color
+) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
+        Box(
+            modifier = Modifier
+                .size(40.dp)
+                .clip(CircleShape)
+                .background(
+                    if (completed) color else MaterialTheme.colorScheme.surfaceVariant
+                ),
+            contentAlignment = Alignment.Center
+        ) {
+            if (completed) {
+                Icon(
+                    imageVector = Icons.Default.CheckCircle,
+                    contentDescription = "Completado",
+                    tint = Color.White,
+                    modifier = Modifier.size(20.dp)
+                )
+            }
+        }
+        Text(
+            text = day,
+            fontSize = 10.sp,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    }
+}
+
+@Composable
+fun GoalsCard(habit: Habit) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Text(
+                text = "Objetivos",
+                fontSize = 16.sp,
+                fontWeight = FontWeight.SemiBold
+            )
+
+            if (habit.dailyGoal.isNotBlank()) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.CheckCircle,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(20.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "Objetivo diario: ${habit.dailyGoal}",
+                        fontSize = 14.sp
+                    )
+                }
+            }
+
+            if (habit.additionalGoal.isNotBlank()) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Star,
+                        contentDescription = null,
+                        tint = Color(0xFFFB8C00),
+                        modifier = Modifier.size(20.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = habit.additionalGoal,
+                        fontSize = 14.sp
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun NotesCard(description: String) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Text(
+                text = "Notas",
+                fontSize = 16.sp,
+                fontWeight = FontWeight.SemiBold
+            )
+            Text(
+                text = description,
+                fontSize = 14.sp,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                lineHeight = 20.sp
+            )
+        }
     }
 }
 
