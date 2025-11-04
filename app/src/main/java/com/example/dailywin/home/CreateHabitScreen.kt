@@ -65,6 +65,7 @@ fun CreateHabitScreen(
     var time by remember { mutableStateOf(habit?.time ?: "") }
     var selectedPriority by remember { mutableStateOf(habit?.priority ?: Priority.MEDIUM) }
     var selectedFrequency by remember { mutableStateOf(habit?.frequency ?: Frequency.DAILY) }
+    var selectedDays by remember { mutableStateOf(habit?.daysOfWeek ?: emptyList()) }
     var startDate by remember { mutableStateOf(habit?.startDate ?: LocalDate.now()) }
     var endDate by remember { mutableStateOf(habit?.endDate ?: LocalDate.now()) }
     var dailyGoal by remember { mutableStateOf(habit?.dailyGoal ?: "") }
@@ -155,7 +156,8 @@ fun CreateHabitScreen(
                                     dailyGoal = dailyGoal,
                                     additionalGoal = additionalGoal,
                                     completed = habit?.completed ?: false,
-                                    streak = habit?.streak ?: 0
+                                    streak = habit?.streak ?: 0,
+                                    daysOfWeek = selectedDays
                                 )
                                 onSave(habitToSave)
                             }
@@ -264,6 +266,29 @@ fun CreateHabitScreen(
                     )
                 }
             }
+            if (selectedFrequency == Frequency.WEEKLY) {
+                Spacer(modifier = Modifier.height(16.dp))
+                SectionTitle(text = "Días de la semana")
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    val days = listOf("L", "M", "X", "J", "V", "S", "D")
+                    days.forEach { day ->
+                        DayOfWeekChip(
+                            day = day,
+                            selected = selectedDays.contains(day),
+                            onClick = {
+                                selectedDays = if (selectedDays.contains(day)) {
+                                    selectedDays - day
+                                } else {
+                                    selectedDays + day
+                                }
+                            }
+                        )
+                    }
+                }
+            }
 
             SectionTitle(text = "Período")
             Row(
@@ -354,6 +379,39 @@ fun CreateHabitScreen(
             )
 
             Spacer(modifier = Modifier.height(40.dp))
+        }
+    }
+}
+
+@Composable
+private fun DayOfWeekChip(
+    day: String,
+    selected: Boolean,
+    onClick: () -> Unit
+) {
+    Surface(
+        modifier = Modifier
+            .height(40.dp)
+            .clickable { onClick() },
+        shape = RoundedCornerShape(20.dp),
+        color = if (selected)
+            MaterialTheme.colorScheme.primaryContainer
+        else
+            MaterialTheme.colorScheme.surfaceVariant
+    ) {
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier.fillMaxSize()
+        ) {
+            Text(
+                text = day,
+                fontSize = 12.sp,
+                fontWeight = if (selected) FontWeight.Medium else FontWeight.Normal,
+                color = if (selected)
+                    MaterialTheme.colorScheme.onPrimaryContainer
+                else
+                    MaterialTheme.colorScheme.onSurfaceVariant
+            )
         }
     }
 }

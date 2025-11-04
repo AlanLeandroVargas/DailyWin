@@ -105,7 +105,7 @@ fun StatsScreen(
                 totalHabits = totalHabits
             )
 
-            HabitsProgressCard(habits = habits)
+            HabitsProgressCard(habits = habits, viewModel = viewModel)
 
             if (habits.isNotEmpty()) {
                 CategoriesCard(habits = habits)
@@ -275,7 +275,7 @@ fun StatBox(
 }
 
 @Composable
-fun HabitsProgressCard(habits: List<Habit>) {
+fun HabitsProgressCard(habits: List<Habit>, viewModel: HabitViewModel) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
@@ -307,7 +307,7 @@ fun HabitsProgressCard(habits: List<Habit>) {
                 }
             } else {
                 habits.forEach { habit ->
-                    HabitProgressItem(habit = habit)
+                    HabitProgressItem(habit = habit, viewModel = viewModel)
                 }
             }
         }
@@ -315,7 +315,8 @@ fun HabitsProgressCard(habits: List<Habit>) {
 }
 
 @Composable
-fun HabitProgressItem(habit: Habit) {
+private fun HabitProgressItem(habit: Habit, viewModel: HabitViewModel) {
+    val weeklyProgress = viewModel.getWeeklyProgress(habit)
     Column(
         modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(4.dp)
@@ -361,9 +362,8 @@ fun HabitProgressItem(habit: Habit) {
             }
         }
 
-        val simulatedProgress = (habit.streak % 30) / 30f
         LinearProgressIndicator(
-            progress = simulatedProgress,
+            progress = weeklyProgress,
             modifier = Modifier
                 .fillMaxWidth()
                 .height(6.dp)

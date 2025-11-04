@@ -167,9 +167,9 @@ fun HomeScreen(
                 items(habits) { habit ->
                     HabitItemWithMenu(
                         habit = habit,
-                        onClick = { onNavigateToDetail(habit.id) },  // Va a detalle
-                        onToggleCompleted = { viewModel.toggleCompleted(habit.id) },
-                        onEdit = { onNavigateToEdit(habit.id) },  // Va a editar
+                        onClick = { onNavigateToDetail(habit.id) },
+                        onToggleCompleted = { viewModel.toggleCompleted(habit.id, habit.startDate) },
+                        onEdit = { onNavigateToEdit(habit.id) },
                         onDelete = { viewModel.deleteHabit(habit.id) }
                     )
                     Divider(
@@ -233,7 +233,6 @@ fun HabitItemWithMenu(
 
         Spacer(modifier = Modifier.width(16.dp))
 
-        // Información del hábito
         Column(
             modifier = Modifier.weight(1f)
         ) {

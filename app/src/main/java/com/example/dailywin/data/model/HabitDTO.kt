@@ -18,6 +18,8 @@ data class HabitDTO (
     val additionalGoal: String = "",
     val completed: Boolean = false,
     val streak: Int = 0,
+    val daysOfWeek: List<String> = emptyList(),
+    val completedDates: List<String> = emptyList()
 ) {
     fun toHabit(): Habit {
         return Habit(
@@ -36,6 +38,7 @@ data class HabitDTO (
             additionalGoal = this.additionalGoal,
             completed = this.completed,
             streak = this.streak,
+            daysOfWeek = this.daysOfWeek
         )
     }
 }

@@ -114,7 +114,7 @@ fun CalendarScreen(
             HabitsForDay(
                 date = selectedDate,
                 habits = habits.filter { habit -> viewModel.isHabitDueOnDate(habit, selectedDate) },
-                onToggleCompleted = { viewModel.toggleCompleted(it.toString()) }
+                onToggleCompleted = { viewModel.toggleCompleted(it.id, selectedDate) }
             )
         }
     }
@@ -209,7 +209,7 @@ fun CalendarGrid(
                         val date = currentMonth.atDay(dayCounter)
                         val isSelected = date == selectedDate
                         val isToday = date == LocalDate.now()
-                        val hasCompletedHabits = habits.any { habit -> habit.startDate == date }
+                        val hasCompletedHabits = habits.any { habit -> habit.completedDates.contains(date) }
 
                         CalendarDay(
                             day = dayCounter,
@@ -284,7 +284,7 @@ fun CalendarDay(
 fun HabitsForDay(
     date: LocalDate,
     habits: List<Habit>,
-    onToggleCompleted: (Long) -> Unit
+    onToggleCompleted: (Habit) -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -319,7 +319,8 @@ fun HabitsForDay(
                 items(habits) { habit ->
                     HabitCalendarItem(
                         habit = habit,
-                        onToggleCompleted = { onToggleCompleted(habit.id.toLong()) }
+                        isCompleted = habit.completedDates.contains(date),
+                        onToggleCompleted = { onToggleCompleted(habit) }
                     )
                 }
             }
@@ -330,13 +331,14 @@ fun HabitsForDay(
 @Composable
 fun HabitCalendarItem(
     habit: Habit,
+    isCompleted: Boolean,
     onToggleCompleted: () -> Unit
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         colors = CardDefaults.cardColors(
-            containerColor = if (habit.completed)
+            containerColor = if (isCompleted)
                 MaterialTheme.colorScheme.surfaceVariant
             else
                 MaterialTheme.colorScheme.surface
@@ -354,14 +356,14 @@ fun HabitCalendarItem(
                     .size(32.dp)
                     .clip(CircleShape)
                     .background(
-                        if (habit.completed)
+                        if (isCompleted)
                             getPriorityColor(habit.priority)
                         else
                             Color.Transparent
                     ),
                 contentAlignment = Alignment.Center
             ) {
-                if (habit.completed) {
+                if (isCompleted) {
                     Icon(
                         imageVector = Icons.Default.CheckCircle,
                         contentDescription = "Completado",
