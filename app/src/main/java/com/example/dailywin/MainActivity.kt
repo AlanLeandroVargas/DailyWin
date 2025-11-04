@@ -15,7 +15,9 @@ import androidx.navigation.compose.rememberNavController
 import com.example.dailywin.data.firebase.FirebaseDataSource
 import com.example.dailywin.data.repository.HabitRepository
 import com.example.dailywin.home.HabitViewModel
+import com.google.firebase.auth.FirebaseAuth
 import com.example.dailywin.navigation.AppNavGraph
+import com.example.dailywin.navigation.Screen
 import com.example.dailywin.ui.theme.DailyWinTheme
 
 class MainActivity : ComponentActivity() {
@@ -67,12 +69,14 @@ fun DailyWinApp() {
     val factory = HabitViewModelFactory(repository, context)
 
     val habitViewModel: HabitViewModel = viewModel(factory = factory)
+    val currentUser = FirebaseAuth.getInstance().currentUser
 
     AppNavGraph(
         navController = navController,
         habitViewModel = habitViewModel,
         onHabitCreated = { habit ->
             habitViewModel.addHabit(habit)
-        }
+        },
+        startDestination = if (currentUser != null) Screen.Home.route else Screen.Login.route
     )
 }

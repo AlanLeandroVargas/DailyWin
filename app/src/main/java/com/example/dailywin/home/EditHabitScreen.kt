@@ -16,6 +16,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -185,27 +186,28 @@ fun EditHabitScreen(
                         )
                     }
                 }
-            }
-            if (selectedFrequency == Frequency.WEEKLY) {
-                Spacer(modifier = Modifier.height(16.dp))
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    val days = listOf("L", "M", "X", "J", "V", "S", "D")
-                    days.forEach { day ->
-                        DayOfWeekChip(
-                            day = day,
-                            selected = selectedDays.contains(day),
-                            onClick = {
-                                selectedDays = if (selectedDays.contains(day)) {
-                                    selectedDays - day
-                                } else {
-                                    selectedDays + day
-                                }
-                            },
-                            modifier = Modifier.weight(1f)
-                        )
+
+                if (selectedFrequency == Frequency.WEEKLY) {
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        val days = listOf("L", "M", "X", "J", "V", "S", "D")
+                        days.forEach { day ->
+                            DayOfWeekChip(
+                                day = day,
+                                selected = selectedDays.contains(day),
+                                onClick = {
+                                    selectedDays = if (selectedDays.contains(day)) {
+                                        selectedDays - day
+                                    } else {
+                                        selectedDays + day
+                                    }
+                                },
+                                modifier = Modifier.weight(1f)
+                            )
+                        }
                     }
                 }
             }
@@ -279,7 +281,15 @@ fun EditHabitScreen(
                     onValueChange = { time = it },
                     placeholder = { Text("HH:MM") },
                     modifier = Modifier.fillMaxWidth(),
-                    singleLine = true
+                    singleLine = true,
+                    trailingIcon = {
+                        IconButton(onClick = { /* TODO: Open time picker */ }) {
+                            Icon(
+                                imageVector = Icons.Default.Schedule,
+                                contentDescription = "Seleccionar hora"
+                            )
+                        }
+                    }
                 )
             }
 
@@ -453,7 +463,6 @@ private fun FrequencyChip(
     Surface(
         modifier = modifier
             .height(40.dp)
-            .clip(RoundedCornerShape(20.dp))
             .clickable { onClick() },
         shape = RoundedCornerShape(20.dp),
         color = if (selected)

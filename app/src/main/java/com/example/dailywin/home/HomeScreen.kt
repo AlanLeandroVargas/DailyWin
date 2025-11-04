@@ -24,6 +24,7 @@ import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.TrendingUp
 import androidx.compose.material.icons.outlined.Circle
@@ -65,11 +66,14 @@ fun HomeScreen(
     viewModel: HabitViewModel,
     onNavigateToCreate: () -> Unit = {},
     onNavigateToDetail: (String) -> Unit = {},
+    onNavigateToEdit: (String) -> Unit = {},
     onNavigateToCalendar: () -> Unit = {},
     onNavigateToStats: () -> Unit = {},
     onLogout: () -> Unit = {}
 ) {
-    val habits by viewModel.habits.collectAsState()
+    val dueTodayHabits by viewModel.dueTodayHabits.collectAsState()
+    val notDueTodayHabits by viewModel.notDueTodayHabits.collectAsState()
+    val completedHabits by viewModel.completedHabits.collectAsState()
     val today = LocalDate.now()
 
     Scaffold(
@@ -105,23 +109,13 @@ fun HomeScreen(
                             tint = MaterialTheme.colorScheme.onSurface
                         )
                     }
-                    var showMenu by remember { mutableStateOf(false) }
-                    IconButton(onClick = { showMenu = !showMenu }) {
+                    IconButton(onClick = {
+                        viewModel.signOut()
+                        onLogout()
+                    }) {
                         Icon(
-                            imageVector = Icons.Default.MoreVert,
-                            contentDescription = "Más opciones"
-                        )
-                    }
-                    DropdownMenu(
-                        expanded = showMenu,
-                        onDismissRequest = { showMenu = false }
-                    ) {
-                        DropdownMenuItem(
-                            text = { Text("Cerrar sesión") },
-                            onClick = {
-                                viewModel.signOut()
-                                onLogout()
-                            }
+                            imageVector = Icons.Default.ExitToApp,
+                            contentDescription = "Cerrar sesión"
                         )
                     }
                 },
@@ -144,7 +138,7 @@ fun HomeScreen(
             }
         }
     ) { paddingValues ->
-        if (habits.isEmpty()) {
+        if (dueTodayHabits.isEmpty() && notDueTodayHabits.isEmpty() && completedHabits.isEmpty()) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -184,13 +178,73 @@ fun HomeScreen(
                     .background(MaterialTheme.colorScheme.background),
                 contentPadding = PaddingValues(vertical = 4.dp)
             ) {
-                items(habits) { habit ->
+                if (dueTodayHabits.isNotEmpty()) {
+                    item {
+                        Text(
+                            text = "Hábitos para hoy",
+                            style = MaterialTheme.typography.titleMedium,
+                            modifier = Modifier.padding(16.dp)
+                        )
+                    }
+                }
+                items(dueTodayHabits) { habit ->
                     HabitItemWithMenu(
                         habit = habit,
                         today = today,
                         onClick = { onNavigateToDetail(habit.id) },
                         onToggleCompleted = { viewModel.toggleCompleted(habit.id, today) },
-                        onDelete = { viewModel.deleteHabit(habit.id) }
+                        onDelete = { viewModel.deleteHabit(habit.id) },
+                        onNavigateToEdit = { onNavigateToEdit(habit.id) }
+                    )
+                    Divider(
+                        color = MaterialTheme.colorScheme.outlineVariant,
+                        thickness = 0.5.dp
+                    )
+                }
+
+                if (notDueTodayHabits.isNotEmpty()) {
+                    item {
+                        Text(
+                            text = "Otros hábitos activos",
+                            style = MaterialTheme.typography.titleMedium,
+                            modifier = Modifier.padding(16.dp)
+                        )
+                    }
+                }
+                items(notDueTodayHabits) { habit ->
+                    HabitItemWithMenu(
+                        habit = habit,
+                        today = today,
+                        onClick = { onNavigateToDetail(habit.id) },
+                        onToggleCompleted = { viewModel.toggleCompleted(habit.id, today) },
+                        onDelete = { viewModel.deleteHabit(habit.id) },
+                        onNavigateToEdit = { onNavigateToEdit(habit.id) },
+                        enabled = false
+                    )
+                    Divider(
+                        color = MaterialTheme.colorScheme.outlineVariant,
+                        thickness = 0.5.dp
+                    )
+                }
+
+                if (completedHabits.isNotEmpty()) {
+                    item {
+                        Text(
+                            text = "Hábitos finalizados",
+                            style = MaterialTheme.typography.titleMedium,
+                            modifier = Modifier.padding(16.dp)
+                        )
+                    }
+                }
+                items(completedHabits) { habit ->
+                    HabitItemWithMenu(
+                        habit = habit,
+                        today = today,
+                        onClick = { onNavigateToDetail(habit.id) },
+                        onToggleCompleted = { viewModel.toggleCompleted(habit.id, today) },
+                        onDelete = { viewModel.deleteHabit(habit.id) },
+                        onNavigateToEdit = { onNavigateToEdit(habit.id) },
+                        enabled = false
                     )
                     Divider(
                         color = MaterialTheme.colorScheme.outlineVariant,
@@ -208,48 +262,54 @@ fun HabitItemWithMenu(
     today: LocalDate,
     onClick: () -> Unit,
     onToggleCompleted: () -> Unit,
-    onDelete: () -> Unit
+    onDelete: () -> Unit,
+    onNavigateToEdit: (String) -> Unit,
+    enabled: Boolean = true
 ) {
-    var showMenu by remember { mutableStateOf(false) }
     val isCompletedToday = habit.completedDates.contains(today)
+    val color = if (enabled) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant
 
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .background(MaterialTheme.colorScheme.surface)
-            .clickable { onClick() }
+            .clickable(enabled = enabled) { onClick() }
             .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         // Checkbox circular
-        Box(
-            modifier = Modifier
-                .size(28.dp)
-                .clip(CircleShape)
-                .background(
-                    if (isCompletedToday)
-                        MaterialTheme.colorScheme.primary
-                    else
-                        Color.Transparent
-                )
-                .clickable { onToggleCompleted() },
-            contentAlignment = Alignment.Center
-        ) {
-            if (isCompletedToday) {
-                Icon(
-                    imageVector = Icons.Default.CheckCircle,
-                    contentDescription = "Completado",
-                    tint = Color.White,
-                    modifier = Modifier.size(28.dp)
-                )
-            } else {
-                Icon(
-                    imageVector = Icons.Outlined.Circle,
-                    contentDescription = "No completado",
-                    tint = MaterialTheme.colorScheme.outline,
-                    modifier = Modifier.size(28.dp)
-                )
+        if (enabled) {
+            Box(
+                modifier = Modifier
+                    .size(28.dp)
+                    .clip(CircleShape)
+                    .background(
+                        if (isCompletedToday)
+                            MaterialTheme.colorScheme.primary
+                        else
+                            Color.Transparent
+                    )
+                    .clickable(enabled = enabled) { onToggleCompleted() },
+                contentAlignment = Alignment.Center
+            ) {
+                if (isCompletedToday) {
+                    Icon(
+                        imageVector = Icons.Default.CheckCircle,
+                        contentDescription = "Completado",
+                        tint = Color.White,
+                        modifier = Modifier.size(28.dp)
+                    )
+                } else {
+                    Icon(
+                        imageVector = Icons.Outlined.Circle,
+                        contentDescription = "No completado",
+                        tint = MaterialTheme.colorScheme.outline,
+                        modifier = Modifier.size(28.dp)
+                    )
+                }
             }
+        } else {
+            Spacer(modifier = Modifier.width(28.dp))
         }
 
         Spacer(modifier = Modifier.width(16.dp))
@@ -261,10 +321,10 @@ fun HabitItemWithMenu(
                 text = habit.name,
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Normal,
-                color = if (isCompletedToday)
+                color = if (isCompletedToday && enabled)
                     MaterialTheme.colorScheme.onSurfaceVariant
                 else
-                    MaterialTheme.colorScheme.onSurface
+                    color
             )
 
             Row(
@@ -275,7 +335,7 @@ fun HabitItemWithMenu(
                     Text(
                         text = habit.time,
                         fontSize = 12.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = color
                     )
                 }
 
@@ -283,71 +343,55 @@ fun HabitItemWithMenu(
                     Text(
                         text = "•",
                         fontSize = 12.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = color
                     )
                     Text(
                         text = habit.category,
                         fontSize = 12.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = color
                     )
                 }
             }
         }
 
-        // Streak indicator
         if (habit.streak > 0) {
             Box(
                 modifier = Modifier
                     .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.primaryContainer)
+                    .background(
+                        if (enabled)
+                            MaterialTheme.colorScheme.primaryContainer
+                        else
+                            MaterialTheme.colorScheme.surfaceVariant
+                    )
                     .padding(horizontal = 8.dp, vertical = 4.dp)
             ) {
                 Text(
                     text = "${habit.streak}",
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                    color = if (enabled)
+                        MaterialTheme.colorScheme.onPrimaryContainer
+                    else
+                        MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
         }
 
-        Box {
-            IconButton(onClick = { showMenu = !showMenu }) {
-                Icon(
-                    imageVector = Icons.Default.MoreVert,
-                    contentDescription = "Más opciones",
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
+        IconButton(onClick = { onNavigateToEdit(habit.id) }) {
+            Icon(
+                imageVector = Icons.Default.Edit,
+                contentDescription = "Editar",
+                tint = color
+            )
+        }
 
-            DropdownMenu(
-                expanded = showMenu,
-                onDismissRequest = { showMenu = false }
-            ) {
-                DropdownMenuItem(
-                    text = {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(12.dp)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Delete,
-                                contentDescription = null,
-                                modifier = Modifier.size(20.dp),
-                                tint = MaterialTheme.colorScheme.error
-                            )
-                            Text(
-                                "Eliminar",
-                                color = MaterialTheme.colorScheme.error
-                            )
-                        }
-                    },
-                    onClick = {
-                        showMenu = false
-                        onDelete()
-                    }
-                )
-            }
+        IconButton(onClick = onDelete) {
+            Icon(
+                imageVector = Icons.Default.Delete,
+                contentDescription = "Eliminar",
+                tint = MaterialTheme.colorScheme.error
+            )
         }
     }
 }

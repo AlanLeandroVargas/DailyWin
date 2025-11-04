@@ -325,7 +325,8 @@ fun HabitsForDay(
                         habit = habit,
                         isCompleted = habit.completedDates.contains(date),
                         onToggleCompleted = { onToggleCompleted(habit) },
-                        onNavigateToEdit = { onNavigateToEdit(habit.id) }
+                        onNavigateToEdit = { onNavigateToEdit(habit.id) },
+                        isFutureDate = date.isAfter(LocalDate.now())
                     )
                 }
             }
@@ -338,7 +339,8 @@ fun HabitCalendarItem(
     habit: Habit,
     isCompleted: Boolean,
     onToggleCompleted: () -> Unit,
-    onNavigateToEdit: () -> Unit
+    onNavigateToEdit: () -> Unit,
+    isFutureDate: Boolean
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -366,7 +368,7 @@ fun HabitCalendarItem(
                         else
                             Color.Transparent
                     )
-                    .clickable { onToggleCompleted() },
+                    .clickable(enabled = !isFutureDate) { onToggleCompleted() },
                 contentAlignment = Alignment.Center
             ) {
                 if (isCompleted) {

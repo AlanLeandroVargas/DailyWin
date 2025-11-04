@@ -20,14 +20,35 @@ class HabitViewModel(private val repository: HabitRepository, private val contex
     private val _habits = MutableStateFlow<List<Habit>>(emptyList())
     val habits: StateFlow<List<Habit>> = _habits.asStateFlow()
 
+    private val _dueTodayHabits = MutableStateFlow<List<Habit>>(emptyList())
+    val dueTodayHabits: StateFlow<List<Habit>> = _dueTodayHabits.asStateFlow()
+
+    private val _notDueTodayHabits = MutableStateFlow<List<Habit>>(emptyList())
+    val notDueTodayHabits: StateFlow<List<Habit>> = _notDueTodayHabits.asStateFlow()
+
+    private val _completedHabits = MutableStateFlow<List<Habit>>(emptyList())
+    val completedHabits: StateFlow<List<Habit>> = _completedHabits.asStateFlow()
+
+
     init {
         loadInitialData()
     }
 
     private fun loadInitialData() {
         viewModelScope.launch {
-            val initialHabits = repository.getHabits()
-            _habits.value = initialHabits.map { it.copy(streak = calculateStreak(it)) }
+            val initialHabits = repository.getHabits().map { it.copy(streak = calculateStreak(it)) }
+            _habits.value = initialHabits
+
+            val today = LocalDate.now()
+            _dueTodayHabits.value = initialHabits
+                .filter { isHabitDueOnDate(it, today) && !it.endDate.isBefore(today) }
+                .sortedByDescending { it.priority }
+
+            _notDueTodayHabits.value = initialHabits
+                .filter { !isHabitDueOnDate(it, today) && !it.endDate.isBefore(today) }
+
+            _completedHabits.value = initialHabits
+                .filter { it.endDate.isBefore(today) }
         }
     }
 

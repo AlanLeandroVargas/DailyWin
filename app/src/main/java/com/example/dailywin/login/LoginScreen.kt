@@ -3,6 +3,9 @@ package com.example.dailywin.login
 import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.ClickableText
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -12,6 +15,7 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 
@@ -24,6 +28,7 @@ fun LoginScreen(
     val state = viewModel.uiState.collectAsState()
     val signInResult by viewModel.signInResult.collectAsState()
     val context = LocalContext.current
+    var passwordVisible by remember { mutableStateOf(false) }
 
     LaunchedEffect(signInResult) {
         signInResult.let { result ->
@@ -55,7 +60,16 @@ fun LoginScreen(
                 value = state.value.password,
                 onValueChange = { viewModel.onPasswordChange(it) },
                 label = { Text("Password") },
-                visualTransformation = PasswordVisualTransformation()
+                visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                trailingIcon = {
+                    val image = if (passwordVisible)
+                        Icons.Filled.Visibility
+                    else Icons.Filled.VisibilityOff
+
+                    IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                        Icon(imageVector = image, contentDescription = "Toggle password visibility")
+                    }
+                }
             )
 
             Spacer(modifier = Modifier.height(20.dp))

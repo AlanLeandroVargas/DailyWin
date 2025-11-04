@@ -36,11 +36,12 @@ sealed class Screen(val route: String) {
 fun AppNavGraph(
     navController: NavHostController,
     habitViewModel: HabitViewModel,
-    onHabitCreated: (Habit) -> Unit
+    onHabitCreated: (Habit) -> Unit,
+    startDestination: String
 ) {
     NavHost(
         navController = navController,
-        startDestination = Screen.Login.route
+        startDestination = startDestination
     ) {
         composable(Screen.Login.route) {
             LoginScreen(
