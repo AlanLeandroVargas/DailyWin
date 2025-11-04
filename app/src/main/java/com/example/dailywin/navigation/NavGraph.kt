@@ -80,6 +80,9 @@ fun AppNavGraph(
                 onNavigateToDetail = { habitId ->
                     navController.navigate(Screen.HabitDetail.createRoute(habitId))
                 },
+                onNavigateToEdit = { habitId ->
+                    navController.navigate(Screen.EditHabit.createRoute(habitId))
+                },
                 onNavigateToCalendar = {
                     navController.navigate(Screen.Calendar.route)
                 },
