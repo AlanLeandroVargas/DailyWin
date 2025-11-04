@@ -21,6 +21,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -58,7 +59,8 @@ import java.util.Locale
 @Composable
 fun CalendarScreen(
     viewModel: HabitViewModel = viewModel(),
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    onNavigateToEdit: (String) -> Unit
 ) {
     val habits by viewModel.habits.collectAsState()
     var currentMonth by remember { mutableStateOf(YearMonth.now()) }
@@ -114,7 +116,8 @@ fun CalendarScreen(
             HabitsForDay(
                 date = selectedDate,
                 habits = habits.filter { habit -> viewModel.isHabitDueOnDate(habit, selectedDate) },
-                onToggleCompleted = { viewModel.toggleCompleted(it.id, selectedDate) }
+                onToggleCompleted = { viewModel.toggleCompleted(it.id, selectedDate) },
+                onNavigateToEdit = onNavigateToEdit
             )
         }
     }
@@ -284,7 +287,8 @@ fun CalendarDay(
 fun HabitsForDay(
     date: LocalDate,
     habits: List<Habit>,
-    onToggleCompleted: (Habit) -> Unit
+    onToggleCompleted: (Habit) -> Unit,
+    onNavigateToEdit: (String) -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -320,7 +324,8 @@ fun HabitsForDay(
                     HabitCalendarItem(
                         habit = habit,
                         isCompleted = habit.completedDates.contains(date),
-                        onToggleCompleted = { onToggleCompleted(habit) }
+                        onToggleCompleted = { onToggleCompleted(habit) },
+                        onNavigateToEdit = { onNavigateToEdit(habit.id) }
                     )
                 }
             }
@@ -332,7 +337,8 @@ fun HabitsForDay(
 fun HabitCalendarItem(
     habit: Habit,
     isCompleted: Boolean,
-    onToggleCompleted: () -> Unit
+    onToggleCompleted: () -> Unit,
+    onNavigateToEdit: () -> Unit
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -347,7 +353,6 @@ fun HabitCalendarItem(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .clickable { onToggleCompleted() }
                 .padding(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -360,7 +365,8 @@ fun HabitCalendarItem(
                             getPriorityColor(habit.priority)
                         else
                             Color.Transparent
-                    ),
+                    )
+                    .clickable { onToggleCompleted() },
                 contentAlignment = Alignment.Center
             ) {
                 if (isCompleted) {
@@ -415,6 +421,13 @@ fun HabitCalendarItem(
                     fontWeight = FontWeight.Medium,
                     color = getPriorityColor(habit.priority),
                     modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                )
+            }
+            IconButton(onClick = onNavigateToEdit) {
+                Icon(
+                    imageVector = Icons.Default.Edit,
+                    contentDescription = "Editar",
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
         }

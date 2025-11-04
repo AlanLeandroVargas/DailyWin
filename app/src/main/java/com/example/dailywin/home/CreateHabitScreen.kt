@@ -12,18 +12,23 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.AddAPhoto
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
@@ -70,6 +75,8 @@ fun CreateHabitScreen(
     var endDate by remember { mutableStateOf(habit?.endDate ?: LocalDate.now()) }
     var dailyGoal by remember { mutableStateOf(habit?.dailyGoal ?: "") }
     var additionalGoal by remember { mutableStateOf(habit?.additionalGoal ?: "") }
+    var imageUri by remember { mutableStateOf(habit?.imageUri ?: "") }
+    var location by remember { mutableStateOf(habit?.location ?: "") }
 
     val context = LocalContext.current
     val categories = listOf("Salud", "Productividad", "Finanzas", "Aprendizaje", "Relaciones", "Hobbies")
@@ -156,7 +163,9 @@ fun CreateHabitScreen(
                                     dailyGoal = dailyGoal,
                                     additionalGoal = additionalGoal,
                                     streak = habit?.streak ?: 0,
-                                    daysOfWeek = selectedDays
+                                    daysOfWeek = selectedDays,
+                                    imageUri = imageUri,
+                                    location = location
                                 )
                                 onSave(habitToSave)
                             }
@@ -377,6 +386,35 @@ fun CreateHabitScreen(
                 minLines = 3,
                 maxLines = 5
             )
+
+            SectionTitle(text = "Extras")
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                OutlinedButton(
+                    onClick = { /* TODO: Implement camera logic */ },
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.AddAPhoto,
+                        contentDescription = "Agregar foto"
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Agregar foto")
+                }
+                OutlinedButton(
+                    onClick = { /* TODO: Implement location logic */ },
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.LocationOn,
+                        contentDescription = "Agregar ubicación"
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Agregar ubicación")
+                }
+            }
 
             Spacer(modifier = Modifier.height(40.dp))
         }

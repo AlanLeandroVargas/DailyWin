@@ -34,6 +34,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -322,6 +323,7 @@ private fun DayOfWeekChip(
     Surface(
         modifier = modifier
             .height(40.dp)
+            .clip(RoundedCornerShape(20.dp))
             .clickable { onClick() },
         shape = RoundedCornerShape(20.dp),
         color = if (selected)
@@ -368,6 +370,7 @@ private fun PriorityChip(
     Surface(
         modifier = modifier
             .height(48.dp)
+            .clip(RoundedCornerShape(12.dp))
             .clickable { onClick() },
         shape = RoundedCornerShape(12.dp),
         color = if (selected) backgroundColor else Color.Transparent,
@@ -400,6 +403,7 @@ private fun CategoryChip(
     Surface(
         modifier = modifier
             .height(40.dp)
+            .clip(RoundedCornerShape(20.dp))
             .clickable { onClick() },
         shape = RoundedCornerShape(20.dp),
         color = if (selected)
@@ -440,6 +444,7 @@ private fun FrequencyChip(
     Surface(
         modifier = modifier
             .height(40.dp)
+            .clip(RoundedCornerShape(20.dp))
             .clickable { onClick() },
         shape = RoundedCornerShape(20.dp),
         color = if (selected)

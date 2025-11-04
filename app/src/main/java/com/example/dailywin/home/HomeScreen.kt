@@ -67,7 +67,8 @@ fun HomeScreen(
     onNavigateToDetail: (String) -> Unit = {},
     onNavigateToEdit: (String) -> Unit = {},
     onNavigateToCalendar: () -> Unit = {},
-    onNavigateToStats: () -> Unit = {}
+    onNavigateToStats: () -> Unit = {},
+    onLogout: () -> Unit = {}
 ) {
     val habits by viewModel.habits.collectAsState()
     val today = LocalDate.now()
@@ -103,6 +104,25 @@ fun HomeScreen(
                             imageVector = Icons.Default.TrendingUp,
                             contentDescription = "Estadísticas",
                             tint = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+                    var showMenu by remember { mutableStateOf(false) }
+                    IconButton(onClick = { showMenu = !showMenu }) {
+                        Icon(
+                            imageVector = Icons.Default.MoreVert,
+                            contentDescription = "Más opciones"
+                        )
+                    }
+                    DropdownMenu(
+                        expanded = showMenu,
+                        onDismissRequest = { showMenu = false }
+                    ) {
+                        DropdownMenuItem(
+                            text = { Text("Cerrar sesión") },
+                            onClick = {
+                                viewModel.signOut()
+                                onLogout()
+                            }
                         )
                     }
                 },

@@ -8,4 +8,5 @@ class HabitRepository(private val firebaseDataSource: FirebaseDataSource) {
     suspend fun getHabits(): List<Habit> = firebaseDataSource.getHabits()
     suspend fun deleteHabit(habitId: String) = firebaseDataSource.deleteHabit(habitId)
     suspend fun updateHabit(habit: Habit) = firebaseDataSource.updateHabit(habit)
+    fun signOut() = firebaseDataSource.signOut()
 }

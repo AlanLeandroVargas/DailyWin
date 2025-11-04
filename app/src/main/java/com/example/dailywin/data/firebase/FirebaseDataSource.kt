@@ -30,4 +30,8 @@ class FirebaseDataSource {
     suspend fun deleteHabit(habitId: String) {
         habitsCollection.document(habitId).delete().await()
     }
+
+    fun signOut() {
+        FirebaseAuth.getInstance().signOut()
+    }
 }

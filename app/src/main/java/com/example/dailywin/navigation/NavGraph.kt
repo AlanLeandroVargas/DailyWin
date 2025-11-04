@@ -65,6 +65,11 @@ fun AppNavGraph(
                 },
                 onNavigateToStats = {
                     navController.navigate(Screen.Stats.route)
+                },
+                onLogout = {
+                    navController.navigate(Screen.Login.route) {
+                        popUpTo(Screen.Home.route) { inclusive = true }
+                    }
                 }
             )
         }
@@ -108,7 +113,10 @@ fun AppNavGraph(
         composable(Screen.Calendar.route) {
             CalendarScreen(
                 viewModel = habitViewModel,
-                onBack = { navController.popBackStack() }
+                onBack = { navController.popBackStack() },
+                onNavigateToEdit = { habitId ->
+                    navController.navigate(Screen.EditHabit.createRoute(habitId))
+                }
             )
         }
 
@@ -117,6 +125,29 @@ fun AppNavGraph(
                 viewModel = habitViewModel,
                 onBack = { navController.popBackStack() }
             )
+        }
+
+        composable(
+            route = Screen.HabitDetail.route,
+            arguments = listOf(
+                navArgument("habitId") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val habitId = backStackEntry.arguments?.getString("habitId") ?: ""
+            val habit = habitViewModel.getHabitById(habitId)
+
+            if (habit != null) {
+                CreateHabitScreen(
+                    habit = habit,
+                    onSave = { updatedHabit ->
+                        habitViewModel.updateHabit(updatedHabit)
+                        navController.popBackStack()
+                    },
+                    onCancel = {
+                        navController.popBackStack()
+                    }
+                )
+            }
         }
     }
 }

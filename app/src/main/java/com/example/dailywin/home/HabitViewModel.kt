@@ -137,4 +137,19 @@ class HabitViewModel(private val repository: HabitRepository, private val contex
         }
         return if (dueInWeek > 0) completedInWeek.toFloat() / dueInWeek else 0f
     }
+
+    fun getCompletionPercentage(habit: Habit): Int {
+        val today = LocalDate.now()
+        val startDate = habit.startDate
+        val daysBetween = ChronoUnit.DAYS.between(startDate, today) + 1
+        if (daysBetween <= 0) return 0
+        val completedCount = habit.completedDates.count { date ->
+            !date.isBefore(startDate) && !date.isAfter(today)
+        }
+        return ((completedCount.toFloat() / daysBetween) * 100).toInt()
+    }
+
+    fun signOut() {
+        repository.signOut()
+    }
 }
