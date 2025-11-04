@@ -8,14 +8,18 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.example.dailywin.data.model.Habit
 import com.example.dailywin.home.CalendarScreen
-import com.example.dailywin.home.CreateHabitScreen
+import com.example.dailywin.home.EditHabitScreen
+import com.example.dailywin.home.HabitDetailScreen
 import com.example.dailywin.home.HabitViewModel
 import com.example.dailywin.home.HomeScreen
+import com.example.dailywin.home.NewHabitScreen
 import com.example.dailywin.home.StatsScreen
 import com.example.dailywin.login.LoginScreen
+import com.example.dailywin.login.RegistrationScreen
 
 sealed class Screen(val route: String) {
     object Login : Screen("login")
+    object Registration : Screen("registration")
     object Home : Screen("home")
     object CreateHabit : Screen("create_habit")
     object EditHabit : Screen("edit_habit/{habitId}") {
@@ -44,6 +48,24 @@ fun AppNavGraph(
                     navController.navigate(Screen.Home.route) {
                         popUpTo(Screen.Login.route) { inclusive = true }
                     }
+                },
+                onNavigateToRegistration = {
+                    navController.navigate(Screen.Registration.route)
+                }
+            )
+        }
+
+        composable(Screen.Registration.route) {
+            RegistrationScreen(
+                onRegistrationSuccess = {
+                    navController.navigate(Screen.Home.route) {
+                        popUpTo(Screen.Login.route) { inclusive = true }
+                    }
+                },
+                onNavigateToLogin = {
+                    navController.navigate(Screen.Login.route) {
+                        popUpTo(Screen.Registration.route) { inclusive = true }
+                    }
                 }
             )
         }
@@ -56,9 +78,6 @@ fun AppNavGraph(
                 },
                 onNavigateToDetail = { habitId ->
                     navController.navigate(Screen.HabitDetail.createRoute(habitId))
-                },
-                onNavigateToEdit = { habitId ->
-                    navController.navigate(Screen.EditHabit.createRoute(habitId))
                 },
                 onNavigateToCalendar = {
                     navController.navigate(Screen.Calendar.route)
@@ -75,7 +94,7 @@ fun AppNavGraph(
         }
 
         composable(Screen.CreateHabit.route) {
-            CreateHabitScreen(
+            NewHabitScreen(
                 habit = null,
                 onSave = { habit ->
                     onHabitCreated(habit)
@@ -97,7 +116,7 @@ fun AppNavGraph(
             val habit = habitViewModel.getHabitById(habitId)
 
             if (habit != null) {
-                CreateHabitScreen(
+                EditHabitScreen(
                     habit = habit,
                     onSave = { updatedHabit ->
                         habitViewModel.updateHabit(updatedHabit)
@@ -137,13 +156,12 @@ fun AppNavGraph(
             val habit = habitViewModel.getHabitById(habitId)
 
             if (habit != null) {
-                CreateHabitScreen(
+                HabitDetailScreen(
                     habit = habit,
-                    onSave = { updatedHabit ->
-                        habitViewModel.updateHabit(updatedHabit)
-                        navController.popBackStack()
+                    onNavigateToEdit = {
+                        navController.navigate(Screen.EditHabit.createRoute(habitId))
                     },
-                    onCancel = {
+                    onBack = {
                         navController.popBackStack()
                     }
                 )

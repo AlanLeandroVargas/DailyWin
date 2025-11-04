@@ -38,21 +38,7 @@ class LoginViewModel : ViewModel() {
             }
     }
 
-    fun createAccount() {
-        val email = _uiState.value.email
-        val password = _uiState.value.password
-        auth.createUserWithEmailAndPassword(email, password)
-            .addOnCompleteListener { task ->
-                if (task.isSuccessful) {
-                    _signInResult.value = Result.success(auth.currentUser)
-                } else {
-                    _signInResult.value = Result.failure(task.exception ?: Exception("Sign-in failed"))
-                }
-            }
-    }
-
     fun login(): Boolean {
-        // Simulate a login check
         return _uiState.value.email.isNotBlank() && _uiState.value.password.isNotBlank()
     }
 }

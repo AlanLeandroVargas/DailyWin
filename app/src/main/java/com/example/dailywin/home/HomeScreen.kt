@@ -65,7 +65,6 @@ fun HomeScreen(
     viewModel: HabitViewModel,
     onNavigateToCreate: () -> Unit = {},
     onNavigateToDetail: (String) -> Unit = {},
-    onNavigateToEdit: (String) -> Unit = {},
     onNavigateToCalendar: () -> Unit = {},
     onNavigateToStats: () -> Unit = {},
     onLogout: () -> Unit = {}
@@ -191,7 +190,6 @@ fun HomeScreen(
                         today = today,
                         onClick = { onNavigateToDetail(habit.id) },
                         onToggleCompleted = { viewModel.toggleCompleted(habit.id, habit.startDate) },
-                        onEdit = { onNavigateToEdit(habit.id) },
                         onDelete = { viewModel.deleteHabit(habit.id) }
                     )
                     Divider(
@@ -210,7 +208,6 @@ fun HabitItemWithMenu(
     today: LocalDate,
     onClick: () -> Unit,
     onToggleCompleted: () -> Unit,
-    onEdit: () -> Unit,
     onDelete: () -> Unit
 ) {
     var showMenu by remember { mutableStateOf(false) }
@@ -327,26 +324,6 @@ fun HabitItemWithMenu(
                 expanded = showMenu,
                 onDismissRequest = { showMenu = false }
             ) {
-                DropdownMenuItem(
-                    text = {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(12.dp)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Edit,
-                                contentDescription = null,
-                                modifier = Modifier.size(20.dp)
-                            )
-                            Text("Editar")
-                        }
-                    },
-                    onClick = {
-                        showMenu = false
-                        onEdit()
-                    }
-                )
-
                 DropdownMenuItem(
                     text = {
                         Row(
