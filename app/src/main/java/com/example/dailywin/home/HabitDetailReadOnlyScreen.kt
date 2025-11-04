@@ -45,6 +45,7 @@ import androidx.compose.ui.unit.sp
 import com.example.dailywin.data.model.Habit
 import com.example.dailywin.data.model.Priority
 import com.example.dailywin.data.model.Frequency
+import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -217,15 +218,14 @@ fun InfoCard(habit: Habit) {
                     Frequency.DAILY -> "Diaria"
                     Frequency.WEEKLY -> "Semanal"
                     Frequency.MONTHLY -> "Mensual"
-                    Frequency.CUSTOM -> "Personalizada"
                 }
             )
 
-            if (habit.startDate.isNotBlank()) {
+            if (habit.startDate != null) {
                 InfoRow(
                     icon = Icons.Default.CalendarToday,
                     label = "Fecha de inicio",
-                    value = habit.startDate
+                    value = habit.startDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
                 )
             }
 

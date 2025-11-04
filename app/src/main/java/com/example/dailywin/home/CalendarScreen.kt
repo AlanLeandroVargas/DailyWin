@@ -113,7 +113,7 @@ fun CalendarScreen(
             // Habits for selected date
             HabitsForDay(
                 date = selectedDate,
-                habits = habits,
+                habits = habits.filter { habit -> viewModel.isHabitDueOnDate(habit, selectedDate) },
                 onToggleCompleted = { viewModel.toggleCompleted(it.toString()) }
             )
         }
@@ -209,7 +209,7 @@ fun CalendarGrid(
                         val date = currentMonth.atDay(dayCounter)
                         val isSelected = date == selectedDate
                         val isToday = date == LocalDate.now()
-                        val hasCompletedHabits = habits.any { it.completed }
+                        val hasCompletedHabits = habits.any { habit -> habit.startDate == date }
 
                         CalendarDay(
                             day = dayCounter,

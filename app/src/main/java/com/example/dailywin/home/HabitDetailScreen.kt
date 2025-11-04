@@ -41,6 +41,7 @@ import androidx.compose.ui.unit.sp
 import com.example.dailywin.data.model.Frequency
 import com.example.dailywin.data.model.Habit
 import com.example.dailywin.data.model.Priority
+import java.time.LocalDate
 import java.util.UUID
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -56,8 +57,8 @@ fun HabitDetailScreen(
     var time by remember { mutableStateOf(habit?.time ?: "") }
     var selectedPriority by remember { mutableStateOf(habit?.priority ?: Priority.MEDIUM) }
     var selectedFrequency by remember { mutableStateOf(habit?.frequency ?: Frequency.DAILY) }
-    var startDate by remember { mutableStateOf(habit?.startDate ?: "") }
-    var endDate by remember { mutableStateOf(habit?.endDate ?: "") }
+    var startDate by remember { mutableStateOf(habit?.startDate ?: LocalDate.now()) }
+    var endDate by remember { mutableStateOf(habit?.endDate ?: LocalDate.now()) }
     var dailyGoal by remember { mutableStateOf(habit?.dailyGoal ?: "") }
     var additionalGoal by remember { mutableStateOf(habit?.additionalGoal ?: "") }
 
@@ -375,7 +376,6 @@ private fun FrequencyChip(
         Frequency.DAILY -> "Diaria"
         Frequency.WEEKLY -> "Semanal"
         Frequency.MONTHLY -> "Mensual"
-        Frequency.CUSTOM -> "Custom"
     }
 
     Surface(

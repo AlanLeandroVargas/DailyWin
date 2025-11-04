@@ -36,6 +36,5 @@ fun getFrequencyLabel(frequency: Frequency): String {
         Frequency.DAILY -> "Diaria"
         Frequency.WEEKLY -> "Semanal"
         Frequency.MONTHLY -> "Mensual"
-        Frequency.CUSTOM -> "Personalizada"
     }
 }

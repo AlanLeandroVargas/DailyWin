@@ -65,8 +65,8 @@ fun CreateHabitScreen(
     var time by remember { mutableStateOf(habit?.time ?: "") }
     var selectedPriority by remember { mutableStateOf(habit?.priority ?: Priority.MEDIUM) }
     var selectedFrequency by remember { mutableStateOf(habit?.frequency ?: Frequency.DAILY) }
-    var startDate by remember { mutableStateOf(habit?.startDate ?: "") }
-    var endDate by remember { mutableStateOf(habit?.endDate ?: "") }
+    var startDate by remember { mutableStateOf(habit?.startDate ?: LocalDate.now()) }
+    var endDate by remember { mutableStateOf(habit?.endDate ?: LocalDate.now()) }
     var dailyGoal by remember { mutableStateOf(habit?.dailyGoal ?: "") }
     var additionalGoal by remember { mutableStateOf(habit?.additionalGoal ?: "") }
 
@@ -79,7 +79,8 @@ fun CreateHabitScreen(
             context,
             { _, year, month, day ->
                 val selectedDate = LocalDate.of(year, month + 1, day)
-                startDate = selectedDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+                startDate = selectedDate
+//                startDate = selectedDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
             },
             calendar.get(Calendar.YEAR),
             calendar.get(Calendar.MONTH),
@@ -93,7 +94,8 @@ fun CreateHabitScreen(
             context,
             { _, year, month, day ->
                 val selectedDate = LocalDate.of(year, month + 1, day)
-                endDate = selectedDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+                endDate = selectedDate
+//                endDate = selectedDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
             },
             calendar.get(Calendar.YEAR),
             calendar.get(Calendar.MONTH),
@@ -269,7 +271,7 @@ fun CreateHabitScreen(
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 OutlinedTextField(
-                    value = startDate,
+                    value = startDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")),
                     onValueChange = {},
                     label = { Text("Fecha de inicio") },
                     placeholder = { Text("Seleccionar") },
@@ -286,7 +288,7 @@ fun CreateHabitScreen(
                 )
 
                 OutlinedTextField(
-                    value = endDate,
+                    value = endDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")),
                     onValueChange = {},
                     label = { Text("Fecha de fin") },
                     placeholder = { Text("Opcional") },
@@ -455,7 +457,6 @@ private fun FrequencyChip(
         Frequency.DAILY -> "Diaria"
         Frequency.WEEKLY -> "Semanal"
         Frequency.MONTHLY -> "Mensual"
-        Frequency.CUSTOM -> "Custom"
     }
 
     Surface(

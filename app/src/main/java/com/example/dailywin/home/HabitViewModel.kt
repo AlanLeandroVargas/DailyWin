@@ -10,6 +10,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import java.time.LocalDate
+import java.time.temporal.ChronoUnit
 import java.util.UUID
 
 class HabitViewModel(private val repository: HabitRepository) : ViewModel() {
@@ -23,9 +25,25 @@ class HabitViewModel(private val repository: HabitRepository) : ViewModel() {
         loadInitialData()
     }
 
+    fun isHabitDueOnDate(habit: Habit, date: LocalDate): Boolean {
+        if (date.isBefore(habit.startDate)) return false
+
+        val daysBetween = ChronoUnit.DAYS.between(habit.startDate, date)
+
+        return when (habit.frequency) {
+            Frequency.DAILY -> true
+            Frequency.WEEKLY -> daysBetween % 7 == 0L
+            Frequency.MONTHLY -> habit.startDate.dayOfMonth == date.dayOfMonth
+        }
+    }
+
+    fun getHabitsForDate(date: LocalDate): List<Habit> {
+        return _habits.value.filter { isHabitDueOnDate(it, date) }
+    }
+
     private fun loadInitialData() {
         viewModelScope.launch {
-            var initialHabits = repository.getHabits()
+            val initialHabits = repository.getHabits()
             _habits.value = initialHabits
         }
     }
