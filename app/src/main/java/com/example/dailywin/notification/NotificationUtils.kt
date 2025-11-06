@@ -4,86 +4,51 @@ import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import com.example.dailywin.data.model.Habit
-import java.time.LocalTime
-import java.time.ZoneId
+import android.os.Build
+import android.provider.Settings
 import java.util.Calendar
 
 object NotificationUtils {
 
-    fun scheduleNotification(context: Context, habit: Habit) {
+    fun scheduleNotification(context: Context, hour: Int, minute: Int, title: String, message: String) {
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+
+        // ✅ Android 12+ requires explicit permission check
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            if (!alarmManager.canScheduleExactAlarms()) {
+                // Opens system settings so the user can grant the permission
+                val intent = Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM)
+                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                context.startActivity(intent)
+                return
+            }
+        }
+
         val intent = Intent(context, HabitNotificationReceiver::class.java).apply {
-            putExtra("habitName", habit.name)
-            putExtra("notificationId", habit.id.hashCode())
+            putExtra("title", title)
+            putExtra("message", message)
         }
+
         val pendingIntent = PendingIntent.getBroadcast(
             context,
-            habit.id.hashCode(),
+            System.currentTimeMillis().toInt(),
             intent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            PendingIntent.FLAG_IMMUTABLE
         )
 
-        val time = LocalTime.parse(habit.time)
         val calendar = Calendar.getInstance().apply {
-            set(Calendar.HOUR_OF_DAY, time.hour)
-            set(Calendar.MINUTE, time.minute)
+            set(Calendar.HOUR_OF_DAY, hour)
+            set(Calendar.MINUTE, minute)
             set(Calendar.SECOND, 0)
-        }
-
-        when (habit.frequency) {
-            com.example.dailywin.data.model.Frequency.DAILY -> {
-                alarmManager.setRepeating(
-                    AlarmManager.RTC_WAKEUP,
-                    calendar.timeInMillis,
-                    AlarmManager.INTERVAL_DAY,
-                    pendingIntent
-                )
-            }
-            com.example.dailywin.data.model.Frequency.WEEKLY -> {
-                habit.daysOfWeek.forEach { day ->
-                    val dayOfWeek = when (day) {
-                        "L" -> Calendar.MONDAY
-                        "M" -> Calendar.TUESDAY
-                        "X" -> Calendar.WEDNESDAY
-                        "J" -> Calendar.THURSDAY
-                        "V" -> Calendar.FRIDAY
-                        "S" -> Calendar.SATURDAY
-                        "D" -> Calendar.SUNDAY
-                        else -> -1
-                    }
-                    if (dayOfWeek != -1) {
-                        val newCalendar = calendar.clone() as Calendar
-                        newCalendar.set(Calendar.DAY_OF_WEEK, dayOfWeek)
-                        alarmManager.setRepeating(
-                            AlarmManager.RTC_WAKEUP,
-                            newCalendar.timeInMillis,
-                            AlarmManager.INTERVAL_DAY * 7,
-                            pendingIntent
-                        )
-                    }
-                }
-            }
-            com.example.dailywin.data.model.Frequency.MONTHLY -> {
-                alarmManager.setRepeating(
-                    AlarmManager.RTC_WAKEUP,
-                    calendar.timeInMillis,
-                    AlarmManager.INTERVAL_DAY * calendar.getActualMaximum(Calendar.DAY_OF_MONTH),
-                    pendingIntent
-                )
+            if (before(Calendar.getInstance())) {
+                add(Calendar.DAY_OF_MONTH, 1)
             }
         }
-    }
 
-    fun cancelNotification(context: Context, habit: Habit) {
-        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        val intent = Intent(context, HabitNotificationReceiver::class.java)
-        val pendingIntent = PendingIntent.getBroadcast(
-            context,
-            habit.id.hashCode(),
-            intent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        alarmManager.setExactAndAllowWhileIdle(
+            AlarmManager.RTC_WAKEUP,
+            calendar.timeInMillis,
+            pendingIntent
         )
-        alarmManager.cancel(pendingIntent)
     }
 }

@@ -1,25 +1,44 @@
 package com.example.dailywin.notification
 
-import android.app.NotificationManager
+import android.Manifest
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
+import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
-import com.example.dailywin.R
+import androidx.core.app.NotificationManagerCompat
+import com.example.dailywin.MainActivity
 
 class HabitNotificationReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
-        val habitName = intent.getStringExtra("habitName") ?: "Habit"
-        val notificationId = intent.getIntExtra("notificationId", 0)
+        val title = intent.getStringExtra("title") ?: "Habit Reminder"
+        val message = intent.getStringExtra("message") ?: "Don't forget your habit today!"
 
-        val notification = NotificationCompat.Builder(context, "habit_reminders")
-            .setSmallIcon(R.drawable.ic_launcher_foreground)
-            .setContentTitle("Recordatorio de Hábito")
-            .setContentText("¡Es hora de tu hábito: $habitName!")
-            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-            .build()
+        val notificationIntent = Intent(context, MainActivity::class.java)
+        val pendingIntent = android.app.PendingIntent.getActivity(
+            context,
+            0,
+            notificationIntent,
+            android.app.PendingIntent.FLAG_IMMUTABLE
+        )
 
-        val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        notificationManager.notify(notificationId, notification)
+        val builder = NotificationCompat.Builder(context, "habit_reminders")
+            .setSmallIcon(android.R.drawable.ic_dialog_info)
+            .setContentTitle(title)
+            .setContentText(message)
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setContentIntent(pendingIntent)
+            .setAutoCancel(true)
+
+        with(NotificationManagerCompat.from(context)) {
+            if (ActivityCompat.checkSelfPermission(
+                    context,
+                    Manifest.permission.POST_NOTIFICATIONS
+                ) == PackageManager.PERMISSION_GRANTED
+            ) {
+                notify(System.currentTimeMillis().toInt(), builder.build())
+            }
+        }
     }
 }

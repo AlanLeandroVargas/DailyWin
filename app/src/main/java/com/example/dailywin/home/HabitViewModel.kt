@@ -1,8 +1,17 @@
 package com.example.dailywin.home
 
+import java.time.LocalTime
+import android.Manifest
+import android.app.PendingIntent
 import android.content.Context
+import android.content.Intent
+import android.content.pm.PackageManager
+import androidx.core.app.ActivityCompat
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.dailywin.MainActivity
 import com.example.dailywin.data.model.Frequency
 import com.example.dailywin.data.model.Habit
 import com.example.dailywin.data.repository.HabitRepository
@@ -32,12 +41,52 @@ class HabitViewModel(private val repository: HabitRepository, private val contex
 
     init {
         loadInitialData()
+//
+//        val intent = Intent(context, MainActivity::class.java).apply {
+//            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+//        }
+//        val pendingIntent: PendingIntent = PendingIntent.getActivity(
+//            context,
+//            0,
+//            intent,
+//            PendingIntent.FLAG_IMMUTABLE
+//        )
+//
+//        val builder = NotificationCompat.Builder(context, "habit_reminders")
+//            .setSmallIcon(android.R.drawable.ic_dialog_info)
+//            .setContentTitle("My notification")
+//            .setContentText("Hello World!")
+//            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+//            .setContentIntent(pendingIntent)
+//            .setAutoCancel(true)
+//
+//        with(NotificationManagerCompat.from(context)) {
+//            if (ActivityCompat.checkSelfPermission(
+//                    context,
+//                    Manifest.permission.POST_NOTIFICATIONS
+//                ) == PackageManager.PERMISSION_GRANTED
+//            ) {
+//                NotificationManagerCompat.from(context).notify(1, builder.build())
+//            }
+//        }
     }
 
     private fun loadInitialData() {
         viewModelScope.launch {
             val initialHabits = repository.getHabits().map { it.copy(streak = calculateStreak(it)) }
             _habits.value = initialHabits
+            initialHabits.forEach {
+                val localTime = LocalTime.parse(it.time) // LocalTime.of(11, 45)
+                val hour = localTime.hour   // 11
+                val minute = localTime.minute // 45
+                NotificationUtils.scheduleNotification(
+                    context = context,
+                    hour = hour,
+                    minute = minute,
+                    title = "Daily Win",
+                    message = it.name
+                )
+            }
 
             val today = LocalDate.now()
             _dueTodayHabits.value = initialHabits
@@ -79,9 +128,9 @@ class HabitViewModel(private val repository: HabitRepository, private val contex
         viewModelScope.launch {
             val newHabit = habit.copy(id = UUID.randomUUID().toString())
             repository.addHabit(newHabit)
-            if (newHabit.time.isNotBlank()) {
-                NotificationUtils.scheduleNotification(context, newHabit)
-            }
+//            if (newHabit.time.isNotBlank()) {
+//                NotificationUtils.scheduleNotification(context, newHabit)
+//            }
             loadInitialData()
         }
     }
@@ -89,11 +138,11 @@ class HabitViewModel(private val repository: HabitRepository, private val contex
     fun updateHabit(habit: Habit) {
         viewModelScope.launch {
             repository.updateHabit(habit)
-            if (habit.time.isNotBlank()) {
-                NotificationUtils.scheduleNotification(context, habit)
-            } else {
-                NotificationUtils.cancelNotification(context, habit)
-            }
+//            if (habit.time.isNotBlank()) {
+//                NotificationUtils.scheduleNotification(context, habit)
+//            } else {
+//                NotificationUtils.cancelNotification(context, habit)
+//            }
             loadInitialData()
         }
     }
@@ -102,7 +151,7 @@ class HabitViewModel(private val repository: HabitRepository, private val contex
         viewModelScope.launch {
             val habit = _habits.value.find { it.id == id }
             repository.deleteHabit(id)
-            habit?.let { NotificationUtils.cancelNotification(context, it) }
+//            habit?.let { NotificationUtils.cancelNotification(context, it) }
             loadInitialData()
         }
     }
