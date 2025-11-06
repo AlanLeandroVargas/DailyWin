@@ -59,7 +59,11 @@ fun StatsScreen(
     val completedToday = habitsDueToday.count { it.completedDates.contains(today) }
     val completionRate = if (totalHabitsDueToday > 0) completedToday.toFloat() / totalHabitsDueToday else 0f
     val longestStreak = habits.maxOfOrNull { it.streak } ?: 0
-    val totalDaysTracked = habits.sumOf { it.completedDates.size }
+
+    val totalCompleted = habits.sumOf { it.completedDates.size }
+    val totalDue = habits.sumOf { viewModel.calculateTotalDueDays(it) }
+    val overallCompletionRate = if (totalDue > 0) totalCompleted.toFloat() / totalDue.toFloat() else 0f
+
 
     Scaffold(
         topBar = {
@@ -101,7 +105,7 @@ fun StatsScreen(
 
             GeneralStatsCard(
                 longestStreak = longestStreak,
-                totalStreak = totalDaysTracked,
+                overallCompletionRate = overallCompletionRate,
                 totalHabits = habits.size
             )
 
@@ -188,7 +192,7 @@ fun TodayCard(
 @Composable
 fun GeneralStatsCard(
     longestStreak: Int,
-    totalStreak: Int,
+    overallCompletionRate: Float,
     totalHabits: Int
 ) {
     Card(
@@ -220,8 +224,8 @@ fun GeneralStatsCard(
 
                 StatBox(
                     icon = Icons.Default.TrendingUp,
-                    value = totalStreak.toString(),
-                    label = "Total días",
+                    value = "${(overallCompletionRate * 100).toInt()}%",
+                    label = "Tasa General",
                     color = Color(0xFF43A047)
                 )
 
@@ -317,8 +321,9 @@ fun HabitsProgressCard(habits: List<Habit>, viewModel: HabitViewModel) {
 
 @Composable
 fun HabitProgressItem(habit: Habit, viewModel: HabitViewModel) {
-    val completionRate = if (habit.completedDates.isNotEmpty()) {
-        habit.completedDates.size.toFloat() / (LocalDate.now().toEpochDay() - habit.startDate.toEpochDay() + 1).toFloat()
+    val totalDueDays = viewModel.calculateTotalDueDays(habit)
+    val completionRate = if (totalDueDays > 0) {
+        habit.completedDates.size.toFloat() / totalDueDays.toFloat()
     } else {
         0f
     }

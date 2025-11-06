@@ -73,7 +73,8 @@ class HabitViewModel(private val repository: HabitRepository, private val contex
 
     private fun loadInitialData() {
         viewModelScope.launch {
-            val initialHabits = repository.getHabits().map { it.copy(streak = calculateStreak(it)) }
+            val today = LocalDate.now()
+            val initialHabits = repository.getHabits().map { it.copy(streak = calculateStreak(it) { today }) }
             _habits.value = initialHabits
             initialHabits.forEach {
                 val localTime = LocalTime.parse(it.time) // LocalTime.of(11, 45)
@@ -88,7 +89,6 @@ class HabitViewModel(private val repository: HabitRepository, private val contex
                 )
             }
 
-            val today = LocalDate.now()
             _dueTodayHabits.value = initialHabits
                 .filter { isHabitDueOnDate(it, today) && !it.endDate.isBefore(today) }
                 .sortedByDescending { it.priority }
@@ -172,31 +172,32 @@ class HabitViewModel(private val repository: HabitRepository, private val contex
         }
     }
 
-    private fun calculateStreak(habit: Habit): Int {
-        val completedDates = habit.completedDates.sortedDescending()
+    private fun calculateStreak(habit: Habit, clock: () -> LocalDate = { LocalDate.now() }): Int {
+        val completedDates = habit.completedDates
         if (completedDates.isEmpty()) {
             return 0
         }
 
         var streak = 0
-        var currentDate = LocalDate.now()
+        val today = clock()
+        var currentDate = today
 
-        if (!completedDates.contains(currentDate) && isHabitDueOnDate(habit, currentDate)) {
-            return 0
-        }
-
-        for (date in completedDates) {
+        while (currentDate >= habit.startDate) {
             if (isHabitDueOnDate(habit, currentDate)) {
-                if (date == currentDate) {
-                    streak++
+                if (currentDate == today && !completedDates.contains(currentDate)) {
                     currentDate = currentDate.minusDays(1)
-                } else if (date.isBefore(currentDate)) {
+                    continue
+                }
+                if (completedDates.contains(currentDate)) {
+                    streak++
+                } else {
                     break
                 }
-            } else {
-                currentDate = currentDate.minusDays(1)
             }
+
+            currentDate = currentDate.minusDays(1)
         }
+
         return streak
     }
 
@@ -211,6 +212,20 @@ class HabitViewModel(private val repository: HabitRepository, private val contex
 
     fun getHabitById(id: String): Habit? {
         return _habits.value.find { it.id == id }
+    }
+
+    fun calculateTotalDueDays(habit: Habit): Int {
+        var totalDueDays = 0
+        var currentDate = habit.startDate
+        val endDate = LocalDate.now()
+
+        while (!currentDate.isAfter(endDate)) {
+            if (isHabitDueOnDate(habit, currentDate)) {
+                totalDueDays++
+            }
+            currentDate = currentDate.plusDays(1)
+        }
+        return totalDueDays
     }
 
     fun signOut() {
