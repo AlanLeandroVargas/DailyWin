@@ -24,6 +24,7 @@ import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.ExitToApp
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.TrendingUp
 import androidx.compose.material.icons.outlined.Circle
 import androidx.compose.material3.Divider
@@ -43,9 +44,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.dailywin.R
 import com.example.dailywin.data.model.Habit
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -60,7 +63,8 @@ fun HomeScreen(
     onNavigateToEdit: (String) -> Unit,
     onNavigateToCalendar: () -> Unit = {},
     onNavigateToStats: () -> Unit = {},
-    onLogout: () -> Unit = {}
+    onLogout: () -> Unit = {},
+    onNavigateToSettings: () -> Unit = {}
 ) {
     val dueTodayHabits by viewModel.dueTodayHabits.collectAsState()
     val notDueTodayHabits by viewModel.notDueTodayHabits.collectAsState()
@@ -73,7 +77,7 @@ fun HomeScreen(
                 title = {
                     Column {
                         Text(
-                            text = "Daily Win",
+                            text = stringResource(id = R.string.daily_win),
                             fontSize = 20.sp,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.primary
@@ -89,14 +93,21 @@ fun HomeScreen(
                     IconButton(onClick = onNavigateToCalendar) {
                         Icon(
                             imageVector = Icons.Default.CalendarToday,
-                            contentDescription = "Calendario",
+                            contentDescription = stringResource(id = R.string.calendar),
                             tint = MaterialTheme.colorScheme.onSurface
                         )
                     }
                     IconButton(onClick = onNavigateToStats) {
                         Icon(
                             imageVector = Icons.Default.TrendingUp,
-                            contentDescription = "Estadísticas",
+                            contentDescription = stringResource(id = R.string.statistics),
+                            tint = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+                    IconButton(onClick = onNavigateToSettings) {
+                        Icon(
+                            imageVector = Icons.Default.Settings,
+                            contentDescription = stringResource(id = R.string.settings),
                             tint = MaterialTheme.colorScheme.onSurface
                         )
                     }
@@ -106,7 +117,7 @@ fun HomeScreen(
                     }) {
                         Icon(
                             imageVector = Icons.Default.ExitToApp,
-                            contentDescription = "Cerrar sesión"
+                            contentDescription = stringResource(id = R.string.log_out)
                         )
                     }
                 },
@@ -123,7 +134,7 @@ fun HomeScreen(
             ) {
                 Icon(
                     imageVector = Icons.Default.Add,
-                    contentDescription = "Agregar hábito",
+                    contentDescription = stringResource(id = R.string.add_habit),
                     tint = Color.White
                 )
             }
@@ -148,14 +159,14 @@ fun HomeScreen(
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                     Text(
-                        text = "No hay hábitos",
+                        text = stringResource(id = R.string.no_habits),
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Medium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = "Toca + para crear tu primer hábito",
+                        text = stringResource(id = R.string.tap_to_create_habit),
                         fontSize = 14.sp,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -172,7 +183,7 @@ fun HomeScreen(
                 if (dueTodayHabits.isNotEmpty()) {
                     item {
                         Text(
-                            text = "Hábitos para hoy",
+                            text = stringResource(id = R.string.habits_for_today),
                             style = MaterialTheme.typography.titleMedium,
                             modifier = Modifier.padding(16.dp)
                         )
@@ -196,7 +207,7 @@ fun HomeScreen(
                 if (notDueTodayHabits.isNotEmpty()) {
                     item {
                         Text(
-                            text = "Otros hábitos activos",
+                            text = stringResource(id = R.string.other_active_habits),
                             style = MaterialTheme.typography.titleMedium,
                             modifier = Modifier.padding(16.dp)
                         )
@@ -221,7 +232,7 @@ fun HomeScreen(
                 if (completedHabits.isNotEmpty()) {
                     item {
                         Text(
-                            text = "Hábitos finalizados",
+                            text = stringResource(id = R.string.completed_habits),
                             style = MaterialTheme.typography.titleMedium,
                             modifier = Modifier.padding(16.dp)
                         )
@@ -286,14 +297,14 @@ fun HabitItemWithMenu(
                 if (isCompletedToday) {
                     Icon(
                         imageVector = Icons.Default.CheckCircle,
-                        contentDescription = "Completado",
+                        contentDescription = stringResource(id = R.string.completed),
                         tint = Color.White,
                         modifier = Modifier.size(28.dp)
                     )
                 } else {
                     Icon(
                         imageVector = Icons.Outlined.Circle,
-                        contentDescription = "No completado",
+                        contentDescription = stringResource(id = R.string.not_completed),
                         tint = MaterialTheme.colorScheme.outline,
                         modifier = Modifier.size(28.dp)
                     )
@@ -373,7 +384,7 @@ fun HabitItemWithMenu(
         IconButton(onClick = { onNavigateToEdit(habit.id) }) {
             Icon(
                 imageVector = Icons.Default.Edit,
-                contentDescription = "Editar",
+                contentDescription = stringResource(id = R.string.edit),
                 tint = color
             )
         }
@@ -381,7 +392,7 @@ fun HabitItemWithMenu(
         IconButton(onClick = onDelete) {
             Icon(
                 imageVector = Icons.Default.Delete,
-                contentDescription = "Eliminar",
+                contentDescription = stringResource(id = R.string.delete),
                 tint = MaterialTheme.colorScheme.error
             )
         }
@@ -390,6 +401,6 @@ fun HabitItemWithMenu(
 
 fun getCurrentDateFormatted(): String {
     val today = LocalDate.now()
-    val formatter = DateTimeFormatter.ofPattern("EEEE, d 'de' MMMM", Locale("es", "ES"))
+    val formatter = DateTimeFormatter.ofPattern("EEEE, d MMMM", Locale.getDefault())
     return today.format(formatter).replaceFirstChar { it.uppercase() }
 }

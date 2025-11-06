@@ -2,11 +2,10 @@ package com.example.dailywin
 
 import android.Manifest
 import android.app.AlarmManager
-import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
-import android.app.PendingIntent
 import android.content.Context
+import android.content.ContextWrapper
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
@@ -15,6 +14,11 @@ import android.provider.Settings
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalContext
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
@@ -25,10 +29,12 @@ import androidx.navigation.compose.rememberNavController
 import com.example.dailywin.data.firebase.FirebaseDataSource
 import com.example.dailywin.data.repository.HabitRepository
 import com.example.dailywin.home.HabitViewModel
-import com.google.firebase.auth.FirebaseAuth
 import com.example.dailywin.navigation.AppNavGraph
 import com.example.dailywin.navigation.Screen
+import com.example.dailywin.ui.LanguageRepository
 import com.example.dailywin.ui.theme.DailyWinTheme
+import com.google.firebase.auth.FirebaseAuth
+import java.util.Locale
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -43,8 +49,15 @@ class MainActivity : ComponentActivity() {
         requestNotificationPermission()
         createNotificationChannel()
         setContent {
-            DailyWinTheme {
-                DailyWinApp()
+            val languageRepository = LanguageRepository(this)
+            val language by languageRepository.language.collectAsState(initial = "en")
+            val localizedContext = remember(language) {
+                updateLocale(language)
+            }
+            CompositionLocalProvider(LocalContext provides localizedContext) {
+                DailyWinTheme {
+                    DailyWinApp()
+                }
             }
         }
     }
@@ -82,6 +95,15 @@ class MainActivity : ComponentActivity() {
             notificationManager.createNotificationChannel(channel)
         }
     }
+}
+
+private fun Context.updateLocale(language: String): ContextWrapper {
+    val locale = Locale(language)
+    Locale.setDefault(locale)
+    val configuration = resources.configuration
+    configuration.setLocale(locale)
+    configuration.setLayoutDirection(locale)
+    return ContextWrapper(createConfigurationContext(configuration))
 }
 
 class HabitViewModelFactory(

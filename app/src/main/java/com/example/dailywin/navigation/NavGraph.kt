@@ -16,11 +16,13 @@ import com.example.dailywin.home.NewHabitScreen
 import com.example.dailywin.home.StatsScreen
 import com.example.dailywin.login.LoginScreen
 import com.example.dailywin.login.RegistrationScreen
+import com.example.dailywin.ui.SettingsScreen
 
 sealed class Screen(val route: String) {
     object Login : Screen("login")
     object Registration : Screen("registration")
     object Home : Screen("home")
+    object Settings : Screen("settings")
     object CreateHabit : Screen("create_habit")
     object EditHabit : Screen("edit_habit/{habitId}") {
         fun createRoute(habitId: String) = "edit_habit/$habitId"
@@ -93,6 +95,17 @@ fun AppNavGraph(
                     navController.navigate(Screen.Login.route) {
                         popUpTo(Screen.Home.route) { inclusive = true }
                     }
+                },
+                onNavigateToSettings = {
+                    navController.navigate(Screen.Settings.route)
+                }
+            )
+        }
+
+        composable(Screen.Settings.route) {
+            SettingsScreen(
+                onNavigateUp = {
+                    navController.popBackStack()
                 }
             )
         }
