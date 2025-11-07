@@ -34,11 +34,15 @@ import com.example.dailywin.navigation.Screen
 import com.example.dailywin.ui.LanguageRepository
 import com.example.dailywin.ui.theme.DailyWinTheme
 import com.google.firebase.auth.FirebaseAuth
+import org.osmdroid.config.Configuration
 import java.util.Locale
 
 class MainActivity : ComponentActivity() {
+    private lateinit var languageRepository: LanguageRepository
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        Configuration.getInstance().load(applicationContext, getSharedPreferences("osm_prefs", MODE_PRIVATE))
+        languageRepository = LanguageRepository(this)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             val alarmManager = getSystemService(AlarmManager::class.java)
             if (!alarmManager.canScheduleExactAlarms()) {
@@ -47,17 +51,15 @@ class MainActivity : ComponentActivity() {
             }
         }
         requestNotificationPermission()
+        requestLocationPermission()
         createNotificationChannel()
         setContent {
-            val languageRepository = LanguageRepository(this)
             val language by languageRepository.language.collectAsState(initial = "en")
-            val localizedContext = remember(language) {
-                updateLocale(language)
-            }
-            CompositionLocalProvider(LocalContext provides localizedContext) {
-                DailyWinTheme {
-                    DailyWinApp()
-                }
+
+            // Apply locale immediately
+            updateLocale(language)
+            DailyWinTheme {
+                DailyWinApp()
             }
         }
     }
@@ -77,9 +79,25 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
+    private fun requestLocationPermission() {
+        if (
+            ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED ||
+            ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED
+        ) {
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+                ),
+                REQUEST_CODE_LOCATION
+            )
+        }
+    }
 
     companion object {
         private const val REQUEST_CODE_NOTIFICATIONS = 1001
+        private const val REQUEST_CODE_LOCATION = 1002
     }
 
     private fun createNotificationChannel() {
@@ -97,13 +115,13 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-private fun Context.updateLocale(language: String): ContextWrapper {
+fun Context.updateLocale(language: String) {
     val locale = Locale(language)
     Locale.setDefault(locale)
-    val configuration = resources.configuration
-    configuration.setLocale(locale)
-    configuration.setLayoutDirection(locale)
-    return ContextWrapper(createConfigurationContext(configuration))
+    val config = resources.configuration
+    config.setLocale(locale)
+    config.setLayoutDirection(locale)
+    resources.updateConfiguration(config, resources.displayMetrics)
 }
 
 class HabitViewModelFactory(
