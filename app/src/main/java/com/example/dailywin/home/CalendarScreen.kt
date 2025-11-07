@@ -43,11 +43,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.dailywin.R
 import com.example.dailywin.data.model.Habit
 import java.time.LocalDate
 import java.time.YearMonth
@@ -71,7 +73,7 @@ fun CalendarScreen(
             TopAppBar(
                 title = {
                     Text(
-                        text = "Calendario",
+                        text = stringResource(id = R.string.calendar),
                         fontSize = 20.sp,
                         fontWeight = FontWeight.Medium
                     )
@@ -80,7 +82,7 @@ fun CalendarScreen(
                     IconButton(onClick = onBack) {
                         Icon(
                             imageVector = Icons.Default.ArrowBack,
-                            contentDescription = "Volver"
+                            contentDescription = stringResource(id = R.string.back)
                         )
                     }
                 },
@@ -139,12 +141,12 @@ fun MonthNavigator(
         IconButton(onClick = onPreviousMonth) {
             Icon(
                 imageVector = Icons.Default.ArrowBack,
-                contentDescription = "Mes anterior"
+                contentDescription = stringResource(id = R.string.previous_month)
             )
         }
 
         Text(
-            text = currentMonth.format(DateTimeFormatter.ofPattern("MMMM yyyy", Locale("es", "ES"))),
+            text = currentMonth.format(DateTimeFormatter.ofPattern("MMMM yyyy", Locale.getDefault())),
             fontSize = 18.sp,
             fontWeight = FontWeight.SemiBold
         )
@@ -152,7 +154,7 @@ fun MonthNavigator(
         IconButton(onClick = onNextMonth) {
             Icon(
                 imageVector = Icons.Default.ArrowForward,
-                contentDescription = "Mes siguiente"
+                contentDescription = stringResource(id = R.string.next_month)
             )
         }
     }
@@ -296,7 +298,7 @@ fun HabitsForDay(
             .padding(horizontal = 16.dp)
     ) {
         Text(
-            text = date.format(DateTimeFormatter.ofPattern("EEEE, d 'de' MMMM", Locale("es", "ES"))),
+            text = date.format(DateTimeFormatter.ofPattern("EEEE, d 'de' MMMM", Locale.getDefault())),
             fontSize = 16.sp,
             fontWeight = FontWeight.SemiBold,
             modifier = Modifier.padding(bottom = 12.dp)
@@ -310,7 +312,7 @@ fun HabitsForDay(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = "No hay hábitos para este día",
+                    text = stringResource(id = R.string.no_habits_for_this_day),
                     fontSize = 14.sp,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -374,7 +376,7 @@ fun HabitCalendarItem(
                 if (isCompleted) {
                     Icon(
                         imageVector = Icons.Default.CheckCircle,
-                        contentDescription = "Completado",
+                        contentDescription = stringResource(id = R.string.completed),
                         tint = Color.White,
                         modifier = Modifier.size(20.dp)
                     )
@@ -428,7 +430,7 @@ fun HabitCalendarItem(
             IconButton(onClick = onNavigateToEdit) {
                 Icon(
                     imageVector = Icons.Default.Edit,
-                    contentDescription = "Editar",
+                    contentDescription = stringResource(id = R.string.edit),
                     tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }

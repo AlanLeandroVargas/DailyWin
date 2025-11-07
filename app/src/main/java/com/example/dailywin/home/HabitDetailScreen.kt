@@ -41,9 +41,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.dailywin.R
 import com.example.dailywin.data.model.Habit
 import com.example.dailywin.data.model.Priority
 import com.example.dailywin.data.model.Frequency
@@ -76,7 +78,7 @@ fun HabitDetailScreen(
                     IconButton(onClick = onBack) {
                         Icon(
                             imageVector = Icons.Default.ArrowBack,
-                            contentDescription = "Volver"
+                            contentDescription = stringResource(id = R.string.back)
                         )
                     }
                 },
@@ -84,7 +86,7 @@ fun HabitDetailScreen(
                     IconButton(onClick = { onNavigateToEdit(habit.id) }) {
                         Icon(
                             imageVector = Icons.Default.Edit,
-                            contentDescription = "Editar Hábito"
+                            contentDescription = stringResource(id = R.string.edit_habit_title)
                         )
                     }
                 },
@@ -139,14 +141,14 @@ fun StatsCard(habit: Habit) {
             StatItem(
                 icon = Icons.Default.TrendingUp,
                 value = "${habit.streak}",
-                label = "Días de racha",
+                label = stringResource(id = R.string.streak_days),
                 color = getPriorityColor(habit.priority)
             )
 
             StatItem(
                 icon = Icons.Default.CheckCircle,
-                value = if (habit.completedDates.contains(LocalDate.now())) "Sí" else "No",
-                label = "Completado hoy",
+                value = if (habit.completedDates.contains(LocalDate.now())) stringResource(id = R.string.yes) else stringResource(id = R.string.no),
+                label = stringResource(id = R.string.completed_today),
                 color = if (habit.completedDates.contains(LocalDate.now()))
                     Color(0xFF43A047)
                 else
@@ -208,7 +210,7 @@ fun InfoCard(habit: Habit) {
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Text(
-                text = "Información",
+                text = stringResource(id = R.string.information),
                 fontSize = 16.sp,
                 fontWeight = FontWeight.SemiBold
             )
@@ -216,7 +218,7 @@ fun InfoCard(habit: Habit) {
             if (habit.category.isNotBlank()) {
                 InfoRow(
                     icon = Icons.Default.Star,
-                    label = "Categoría",
+                    label = stringResource(id = R.string.category),
                     value = habit.category
                 )
             }
@@ -224,24 +226,24 @@ fun InfoCard(habit: Habit) {
             if (habit.time.isNotBlank()) {
                 InfoRow(
                     icon = Icons.Default.Schedule,
-                    label = "Hora",
+                    label = stringResource(id = R.string.time),
                     value = habit.time
                 )
             }
 
             InfoRow(
                 icon = Icons.Default.CalendarToday,
-                label = "Frecuencia",
+                label = stringResource(id = R.string.frequency),
                 value = when (habit.frequency) {
-                    Frequency.DAILY -> "Diaria"
-                    Frequency.WEEKLY -> "Semanal"
-                    Frequency.MONTHLY -> "Mensual"
+                    Frequency.DAILY -> stringResource(id = R.string.frequency_daily)
+                    Frequency.WEEKLY -> stringResource(id = R.string.frequency_weekly)
+                    Frequency.MONTHLY -> stringResource(id = R.string.frequency_monthly)
                 }
             )
 
             InfoRow(
                 icon = Icons.Default.CalendarToday,
-                label = "Fecha de inicio",
+                label = stringResource(id = R.string.start_date),
                 value = habit.startDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
             )
 
@@ -250,7 +252,7 @@ fun InfoCard(habit: Habit) {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "Prioridad:",
+                    text = "${stringResource(id = R.string.priority)}:",
                     fontSize = 14.sp,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.width(120.dp)
@@ -261,9 +263,9 @@ fun InfoCard(habit: Habit) {
                 ) {
                     Text(
                         text = when (habit.priority) {
-                            Priority.HIGH -> "Alta"
-                            Priority.MEDIUM -> "Media"
-                            Priority.LOW -> "Baja"
+                            Priority.HIGH -> stringResource(id = R.string.priority_high)
+                            Priority.MEDIUM -> stringResource(id = R.string.priority_medium)
+                            Priority.LOW -> stringResource(id = R.string.priority_low)
                         },
                         modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
                         fontSize = 12.sp,
@@ -321,7 +323,7 @@ fun WeeklyProgressCard(habit: Habit, viewModel: HabitViewModel) {
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Text(
-                text = "Progreso de la semana",
+                text = stringResource(id = R.string.weekly_progress),
                 fontSize = 16.sp,
                 fontWeight = FontWeight.SemiBold
             )
@@ -342,7 +344,7 @@ fun WeeklyProgressCard(habit: Habit, viewModel: HabitViewModel) {
             }
 
             Text(
-                text = "${weeklyCompletionData.count { it == 1f }} de 7 días completados esta semana",
+                text = stringResource(id = R.string.days_completed_this_week, weeklyCompletionData.count { it == 1f }),
                 fontSize = 12.sp,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -372,7 +374,7 @@ fun DayCircle(
             if (completed) {
                 Icon(
                     imageVector = Icons.Default.CheckCircle,
-                    contentDescription = "Completado",
+                    contentDescription = stringResource(id = R.string.completed),
                     tint = Color.White,
                     modifier = Modifier.size(20.dp)
                 )
@@ -399,7 +401,7 @@ fun GoalsCard(habit: Habit) {
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Text(
-                text = "Objetivos",
+                text = stringResource(id = R.string.goals),
                 fontSize = 16.sp,
                 fontWeight = FontWeight.SemiBold
             )
@@ -416,7 +418,7 @@ fun GoalsCard(habit: Habit) {
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = "Objetivo diario: ${habit.dailyGoal}",
+                        text = stringResource(id = R.string.daily_goal_label, habit.dailyGoal),
                         fontSize = 14.sp
                     )
                 }
@@ -456,7 +458,7 @@ fun NotesCard(description: String) {
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Text(
-                text = "Notas",
+                text = stringResource(id = R.string.notes),
                 fontSize = 16.sp,
                 fontWeight = FontWeight.SemiBold
             )
@@ -477,12 +479,12 @@ fun CalendarView(completedDates: List<LocalDate>) {
     val firstDayOfWeek = firstDayOfMonth.dayOfWeek.value
     val daysInMonth = currentMonth.lengthOfMonth()
     val daysOfWeek = remember {
-        DayOfWeek.values().map { it.getDisplayName(TextStyle.SHORT, Locale("es", "ES")) }
+        DayOfWeek.values().map { it.getDisplayName(TextStyle.SHORT, Locale.getDefault()) }
     }
 
     Column {
         Text(
-            text = "Calendario de finalización",
+            text = stringResource(id = R.string.completion_calendar),
             fontSize = 18.sp,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.primary

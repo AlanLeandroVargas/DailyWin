@@ -8,12 +8,14 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.dailywin.R
 
 @Composable
 fun RegistrationScreen(
@@ -46,7 +48,7 @@ fun RegistrationScreen(
             TextField(
                 value = state.value.name,
                 onValueChange = { viewModel.onNameChange(it) },
-                label = { Text("Name") }
+                label = { Text(stringResource(id = R.string.name)) }
             )
 
             Spacer(modifier = Modifier.height(12.dp))
@@ -54,7 +56,7 @@ fun RegistrationScreen(
             TextField(
                 value = state.value.lastName,
                 onValueChange = { viewModel.onLastNameChange(it) },
-                label = { Text("Last Name") }
+                label = { Text(stringResource(id = R.string.last_name)) }
             )
 
             Spacer(modifier = Modifier.height(12.dp))
@@ -62,7 +64,7 @@ fun RegistrationScreen(
             TextField(
                 value = state.value.email,
                 onValueChange = { viewModel.onEmailChange(it) },
-                label = { Text("Email") }
+                label = { Text(stringResource(id = R.string.email)) }
             )
 
             Spacer(modifier = Modifier.height(12.dp))
@@ -70,7 +72,7 @@ fun RegistrationScreen(
             TextField(
                 value = state.value.password,
                 onValueChange = { viewModel.onPasswordChange(it) },
-                label = { Text("Password") },
+                label = { Text(stringResource(id = R.string.password)) },
                 visualTransformation = PasswordVisualTransformation()
             )
 
@@ -79,10 +81,10 @@ fun RegistrationScreen(
             Button(onClick = {
                 viewModel.createAccount()
             }) {
-                Text("Register")
+                Text(stringResource(id = R.string.register))
             }
             ClickableText(
-                text = AnnotatedString("¿Ya tenes cuenta? Inicia sesión desde acá"),
+                text = AnnotatedString(stringResource(id = R.string.already_have_account_prompt)),
                 onClick = { onNavigateToLogin() },
                 modifier = Modifier.padding(top = 12.dp),
                 style = TextStyle(

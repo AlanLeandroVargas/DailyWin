@@ -11,6 +11,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextDecoration
@@ -18,6 +19,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.dailywin.R
 
 @Composable
 fun LoginScreen(
@@ -51,7 +53,7 @@ fun LoginScreen(
             TextField(
                 value = state.value.email,
                 onValueChange = { viewModel.onEmailChange(it) },
-                label = { Text("Email") }
+                label = { Text(stringResource(id = R.string.email)) }
             )
 
             Spacer(modifier = Modifier.height(12.dp))
@@ -59,7 +61,7 @@ fun LoginScreen(
             TextField(
                 value = state.value.password,
                 onValueChange = { viewModel.onPasswordChange(it) },
-                label = { Text("Password") },
+                label = { Text(stringResource(id = R.string.password)) },
                 visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                 trailingIcon = {
                     val image = if (passwordVisible)
@@ -67,7 +69,7 @@ fun LoginScreen(
                     else Icons.Filled.VisibilityOff
 
                     IconButton(onClick = { passwordVisible = !passwordVisible }) {
-                        Icon(imageVector = image, contentDescription = "Toggle password visibility")
+                        Icon(imageVector = image, contentDescription = stringResource(id = R.string.toggle_password_visibility))
                     }
                 }
             )
@@ -77,10 +79,10 @@ fun LoginScreen(
             Button(onClick = {
                 viewModel.signIn()
             }) {
-                Text("Login")
+                Text(stringResource(id = R.string.login))
             }
             ClickableText(
-                text = AnnotatedString("¿No tienes cuenta? Crea una acá"),
+                text = AnnotatedString(stringResource(id = R.string.no_account_prompt)),
                 onClick = { onNavigateToRegistration() },
                 modifier = Modifier.padding(top = 12.dp),
                 style = TextStyle(

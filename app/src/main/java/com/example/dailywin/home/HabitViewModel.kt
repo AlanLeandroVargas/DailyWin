@@ -217,7 +217,12 @@ class HabitViewModel(private val repository: HabitRepository, private val contex
     fun calculateTotalDueDays(habit: Habit): Int {
         var totalDueDays = 0
         var currentDate = habit.startDate
-        val endDate = LocalDate.now()
+        val today = LocalDate.now()
+        val endDate = if (habit.endDate != null && habit.endDate.isBefore(today)) {
+            habit.endDate
+        } else {
+            today
+        }
 
         while (!currentDate.isAfter(endDate)) {
             if (isHabitDueOnDate(habit, currentDate)) {

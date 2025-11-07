@@ -149,7 +149,7 @@ fun NewHabitScreen(
                             if (name.isNotBlank()) {
                                 val user = FirebaseAuth.getInstance().currentUser
                                 val habitToSave = Habit(
-                                    id = habit?.id ?: "",  // Si es edición usa el id existente,
+                                    id = habit?.id ?: "",
                                     userId = user?.uid ?: "",
                                     name = name,
                                     category = category,

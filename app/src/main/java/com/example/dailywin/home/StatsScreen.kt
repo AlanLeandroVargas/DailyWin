@@ -388,8 +388,12 @@ fun HabitProgressItem(habit: Habit, viewModel: HabitViewModel) {
 
 @Composable
 fun CategoriesCard(habits: List<Habit>) {
-    val categoryCounts = habits.groupBy { it.category }.mapValues { it.value.size }
-    val sortedCategories = categoryCounts.entries.sortedByDescending { it.value }
+    val validCategories = habits
+        .groupBy { it.category }
+        .mapValues { it.value.size }
+        .entries
+        .filter { it.key.isNotBlank() }
+        .sortedByDescending { it.value }
 
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -407,8 +411,21 @@ fun CategoriesCard(habits: List<Habit>) {
                 fontWeight = FontWeight.SemiBold
             )
 
-            sortedCategories.forEach { (category, count) ->
-                if (category.isNotBlank()) {
+            if (validCategories.isEmpty()) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 24.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "Ningún hábito tiene categoría",
+                        fontSize = 14.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            } else {
+                validCategories.forEach { (category, count) ->
                     CategoryItem(
                         category = category,
                         count = count,

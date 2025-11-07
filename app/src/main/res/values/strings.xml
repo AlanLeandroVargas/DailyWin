@@ -19,4 +19,80 @@
     <string name="english">Inglés</string>
     <string name="spanish">Español</string>
     <string name="portuguese">Portugués</string>
+
+    <!-- Login Screen -->
+    <string name="email">Correo electrónico</string>
+    <string name="password">Contraseña</string>
+    <string name="toggle_password_visibility">Alternar visibilidad de contraseña</string>
+    <string name="login">Iniciar sesión</string>
+    <string name="no_account_prompt">¿No tienes cuenta? Crea una aquí</string>
+
+    <!-- Registration Screen -->
+    <string name="name">Nombre</string>
+    <string name="last_name">Apellido</string>
+    <string name="register">Registrarse</string>
+    <string name="already_have_account_prompt">¿Ya tienes cuenta? Inicia sesión aquí</string>
+
+    <!-- New/Edit Habit Screen -->
+    <string name="new_habit">Nuevo hábito</string>
+    <string name="edit_habit">Editar hábito</string>
+    <string name="back">Volver</string>
+    <string name="save">Guardar</string>
+    <string name="basic_information">Información básica</string>
+    <string name="habit_name_required">Nombre del hábito *</string>
+    <string name="habit_name_placeholder">Ej: Hacer ejercicio</string>
+    <string name="category">Categoría</string>
+    <string name="category_health">Salud</string>
+    <string name="category_productivity">Productividad</string>
+    <string name="category_finance">Finanzas</string>
+    <string name="category_learning">Aprendizaje</string>
+    <string name="category_relationships">Relaciones</string>
+    <string name="category_hobbies">Hobbies</string>
+    <string name="priority">Prioridad</string>
+    <string name="priority_high">Alta</string>
+    <string name="priority_medium">Media</string>
+    <string name="priority_low">Baja</string>
+    <string name="frequency">Frecuencia</string>
+    <string name="frequency_daily">Diaria</string>
+    <string name="frequency_weekly">Semanal</string>
+    <string name="frequency_monthly">Mensual</string>
+    <string name="days_of_the_week">Días de la semana</string>
+    <string name="period">Período</string>
+    <string name="start_date">Fecha de inicio</string>
+    <string name="select">Seleccionar</string>
+    <string name="select_date">Seleccionar fecha</string>
+    <string name="end_date">Fecha de fin</string>
+    <string name="optional">Opcional</string>
+    <string name="reminder">Recordatorio</string>
+    <string name="time">Hora</string>
+    <string name="select_time">Seleccionar hora</string>
+    <string name="goals">Objetivos</string>
+    <string name="daily_goal">Objetivo diario</string>
+    <string name="daily_goal_placeholder">Ej: 30 minutos</string>
+    <string name="additional_goal">Objetivo adicional</string>
+    <string name="additional_goal_placeholder">Ej: Perder 5kg en 3 meses</string>
+    <string name="notes">Notas</string>
+    <string name="description">Descripción</string>
+    <string name="description_placeholder">Agrega notas sobre este hábito</string>
+    <string name="extras">Extras</string>
+    <string name="add_photo">Agregar foto</string>
+    <string name="add_location">Agregar ubicación</string>
+    <string name="options">Opciones</string>
+
+    <!-- Calendar Screen -->
+    <string name="previous_month">Mes anterior</string>
+    <string name="next_month">Mes siguiente</string>
+    <string name="no_habits_for_this_day">No hay hábitos para este día</string>
+
+    <!-- Habit Detail Screen -->
+    <string name="edit_habit_title">Editar Hábito</string>
+    <string name="streak_days">Días de racha</string>
+    <string name="yes">Sí</string>
+    <string name="no">No</string>
+    <string name="completed_today">Completado hoy</string>
+    <string name="information">Información</string>
+    <string name="weekly_progress">Progreso de la semana</string>
+    <string name="days_completed_this_week">%1$d de 7 días completados esta semana</string>
+    <string name="daily_goal_label">Objetivo diario: %1$s</string>
+    <string name="completion_calendar">Calendario de finalización</string>
 </resources>
