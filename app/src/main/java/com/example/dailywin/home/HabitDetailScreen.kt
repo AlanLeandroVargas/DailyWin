@@ -1,5 +1,6 @@
 package com.example.dailywin.home
 
+import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -36,17 +37,25 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.AndroidView
 import com.example.dailywin.data.model.Habit
 import com.example.dailywin.data.model.Priority
 import com.example.dailywin.data.model.Frequency
+import org.osmdroid.config.Configuration
+import org.osmdroid.tileprovider.tilesource.TileSourceFactory
+import org.osmdroid.util.GeoPoint
+import org.osmdroid.views.MapView
+import org.osmdroid.views.overlay.Marker
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.YearMonth
@@ -113,6 +122,10 @@ fun HabitDetailScreen(
 
             if (habit.description.isNotBlank()) {
                 NotesCard(description = habit.description)
+            }
+
+            if (habit.location.isNotBlank()) {
+                HabitLocationMap(location = habit.location)
             }
 
             Spacer(modifier = Modifier.height(24.dp))
@@ -525,6 +538,61 @@ fun CalendarView(completedDates: List<LocalDate>) {
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+fun HabitLocationMap(location: String) {
+    if (location.isBlank()) return
+
+    val parts = location.split(",")
+    if (parts.size != 2) return
+
+    val latitude = parts[0].toDoubleOrNull() ?: return
+    val longitude = parts[1].toDoubleOrNull() ?: return
+    val context = LocalContext.current
+
+    // Initialize OSMDroid configuration
+    LaunchedEffect(Unit) {
+        Configuration.getInstance().load(context, context.getSharedPreferences("osm_prefs", Context.MODE_PRIVATE))
+    }
+
+    Column(
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        Text(
+            text = "Habit Location",
+            fontSize = MaterialTheme.typography.titleMedium.fontSize,
+            fontWeight = FontWeight.SemiBold
+        )
+
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(250.dp),
+            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        ) {
+            AndroidView(
+                factory = { ctx ->
+                    MapView(ctx).apply {
+                        setTileSource(TileSourceFactory.MAPNIK)
+                        setMultiTouchControls(true)
+
+                        val startPoint = GeoPoint(latitude, longitude)
+                        controller.setZoom(16.0)
+                        controller.setCenter(startPoint)
+
+                        val marker = Marker(this).apply {
+                            position = startPoint
+                            setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+                            title = "Habit Location"
+                        }
+                        overlays.add(marker)
+                    }
+                },
+                modifier = Modifier.fillMaxSize()
+            )
         }
     }
 }

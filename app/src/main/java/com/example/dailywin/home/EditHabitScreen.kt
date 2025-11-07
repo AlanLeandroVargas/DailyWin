@@ -77,6 +77,7 @@ fun EditHabitScreen(
     var additionalGoal by remember { mutableStateOf(habit?.additionalGoal ?: "") }
     var imageUri by remember { mutableStateOf(habit?.imageUri ?: "") }
     var location by remember { mutableStateOf(habit?.location ?: "") }
+    var showMapDialog by remember { mutableStateOf(false) }
 
     val context = LocalContext.current
     val categories = listOf("Salud", "Productividad", "Finanzas", "Aprendizaje", "Relaciones", "Hobbies")
@@ -399,16 +400,44 @@ fun EditHabitScreen(
                     Text("Agregar foto")
                 }
                 OutlinedButton(
-                    onClick = { /* TODO: Implement location logic */ },
+                    onClick = { showMapDialog = true },
                     modifier = Modifier.weight(1f)
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.LocationOn,
-                        contentDescription = "Agregar ubicación"
-                    )
+                    Icon(imageVector = Icons.Default.LocationOn, contentDescription = "Select location")
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("Agregar ubicación")
+                    Text(
+                        text = if (location != null || location != "")
+                            "Ubicación seleccionada"
+                        else
+                            "Agregar ubicación"
+                    )
                 }
+            }
+            if (showMapDialog) {
+                var initialLat: Double?
+                var initialLon: Double?
+
+                habit?.location?.split(",")?.let { parts ->
+                    if (parts.size == 2) {
+                        initialLat = parts[0].toDoubleOrNull()
+                        initialLon = parts[1].toDoubleOrNull()
+                    } else {
+                        initialLat = null
+                        initialLon = null
+                    }
+                } ?: run {
+                    initialLat = null
+                    initialLon = null
+                }
+                LocationPickerDialog(
+                    onDismiss = { showMapDialog = false },
+                    onLocationSelected = { lat, lon ->
+                        location = "$lat,$lon"
+                        showMapDialog = false
+                    },
+                    initialLatitude = initialLat,
+                    initialLongitude = initialLon
+                )
             }
 
             Spacer(modifier = Modifier.height(40.dp))

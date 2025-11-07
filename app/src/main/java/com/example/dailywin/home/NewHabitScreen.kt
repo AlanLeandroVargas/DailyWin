@@ -1,5 +1,6 @@
 package com.example.dailywin.home
 
+import android.app.Activity
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 import androidx.compose.foundation.clickable
@@ -24,6 +25,7 @@ import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Schedule
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -47,10 +49,14 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.AndroidView
 import com.example.dailywin.data.model.Frequency
 import com.example.dailywin.data.model.Habit
 import com.example.dailywin.data.model.Priority
 import com.google.firebase.auth.FirebaseAuth
+import org.osmdroid.util.GeoPoint
+import org.osmdroid.views.MapView
+import org.osmdroid.views.overlay.Marker
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
@@ -77,53 +83,55 @@ fun NewHabitScreen(
     var additionalGoal by remember { mutableStateOf(habit?.additionalGoal ?: "") }
     var imageUri by remember { mutableStateOf(habit?.imageUri ?: "") }
     var location by remember { mutableStateOf(habit?.location ?: "") }
+    var showMapDialog by remember { mutableStateOf(false) }
 
     val context = LocalContext.current
+    val activity = context as? Activity
     val categories = listOf("Salud", "Productividad", "Finanzas", "Aprendizaje", "Relaciones", "Hobbies")
 
-    val startDatePicker = remember {
-        val calendar = Calendar.getInstance()
-        DatePickerDialog(
-            context,
-            { _, year, month, day ->
-                val selectedDate = LocalDate.of(year, month + 1, day)
-                startDate = selectedDate
-//                startDate = selectedDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
-            },
-            calendar.get(Calendar.YEAR),
-            calendar.get(Calendar.MONTH),
-            calendar.get(Calendar.DAY_OF_MONTH)
-        )
-    }
-
-    val endDatePicker = remember {
-        val calendar = Calendar.getInstance()
-        DatePickerDialog(
-            context,
-            { _, year, month, day ->
-                val selectedDate = LocalDate.of(year, month + 1, day)
-                endDate = selectedDate
-//                endDate = selectedDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
-            },
-            calendar.get(Calendar.YEAR),
-            calendar.get(Calendar.MONTH),
-            calendar.get(Calendar.DAY_OF_MONTH)
-        )
-    }
-
-    val timePicker = remember {
-        val calendar = Calendar.getInstance()
-        TimePickerDialog(
-            context,
-            { _, hour, minute ->
-                val selectedTime = LocalTime.of(hour, minute)
-                time = selectedTime.format(DateTimeFormatter.ofPattern("HH:mm"))
-            },
-            calendar.get(Calendar.HOUR_OF_DAY),
-            calendar.get(Calendar.MINUTE),
-            true
-        )
-    }
+//    val startDatePicker = remember {
+//        val calendar = Calendar.getInstance()
+//        DatePickerDialog(
+//            context,
+//            { _, year, month, day ->
+//                val selectedDate = LocalDate.of(year, month + 1, day)
+//                startDate = selectedDate
+////                startDate = selectedDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+//            },
+//            calendar.get(Calendar.YEAR),
+//            calendar.get(Calendar.MONTH),
+//            calendar.get(Calendar.DAY_OF_MONTH)
+//        )
+//    }
+//
+//    val endDatePicker = remember {
+//        val calendar = Calendar.getInstance()
+//        DatePickerDialog(
+//            context,
+//            { _, year, month, day ->
+//                val selectedDate = LocalDate.of(year, month + 1, day)
+//                endDate = selectedDate
+////                endDate = selectedDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+//            },
+//            calendar.get(Calendar.YEAR),
+//            calendar.get(Calendar.MONTH),
+//            calendar.get(Calendar.DAY_OF_MONTH)
+//        )
+//    }
+//
+//    val timePicker = remember {
+//        val calendar = Calendar.getInstance()
+//        TimePickerDialog(
+//            context,
+//            { _, hour, minute ->
+//                val selectedTime = LocalTime.of(hour, minute)
+//                time = selectedTime.format(DateTimeFormatter.ofPattern("HH:mm"))
+//            },
+//            calendar.get(Calendar.HOUR_OF_DAY),
+//            calendar.get(Calendar.MINUTE),
+//            true
+//        )
+//    }
 
     Scaffold(
         topBar = {
@@ -311,11 +319,23 @@ fun NewHabitScreen(
                     placeholder = { Text("Seleccionar") },
                     readOnly = true,
                     trailingIcon = {
-                        IconButton(onClick = { startDatePicker.show() }) {
-                            Icon(
-                                imageVector = Icons.Default.CalendarToday,
-                                contentDescription = "Seleccionar fecha"
-                            )
+                        IconButton(
+                            onClick = {
+                                val activity = context as? Activity ?: return@IconButton
+                                if (activity.isFinishing || activity.isDestroyed) return@IconButton
+                                val calendar = Calendar.getInstance()
+                                DatePickerDialog(
+                                    activity,
+                                    { _, year, month, day ->
+                                        startDate = LocalDate.of(year, month + 1, day)
+                                    },
+                                    calendar.get(Calendar.YEAR),
+                                    calendar.get(Calendar.MONTH),
+                                    calendar.get(Calendar.DAY_OF_MONTH)
+                                ).show()
+                            }
+                        ) {
+                            Icon(imageVector = Icons.Default.CalendarToday, contentDescription = null)
                         }
                     },
                     modifier = Modifier.weight(1f)
@@ -328,11 +348,23 @@ fun NewHabitScreen(
                     placeholder = { Text("Opcional") },
                     readOnly = true,
                     trailingIcon = {
-                        IconButton(onClick = { endDatePicker.show() }) {
-                            Icon(
-                                imageVector = Icons.Default.CalendarToday,
-                                contentDescription = "Seleccionar fecha"
-                            )
+                        IconButton(
+                            onClick = {
+                                val activity = context as? Activity ?: return@IconButton
+                                if (activity.isFinishing || activity.isDestroyed) return@IconButton
+                                val calendar = Calendar.getInstance()
+                                DatePickerDialog(
+                                    activity,
+                                    { _, year, month, day ->
+                                        endDate = LocalDate.of(year, month + 1, day)
+                                    },
+                                    calendar.get(Calendar.YEAR),
+                                    calendar.get(Calendar.MONTH),
+                                    calendar.get(Calendar.DAY_OF_MONTH)
+                                ).show()
+                            }
+                        ) {
+                            Icon(imageVector = Icons.Default.CalendarToday, contentDescription = null)
                         }
                     },
                     modifier = Modifier.weight(1f)
@@ -347,11 +379,23 @@ fun NewHabitScreen(
                 placeholder = { Text("Seleccionar hora") },
                 readOnly = true,
                 trailingIcon = {
-                    IconButton(onClick = { timePicker.show() }) {
-                        Icon(
-                            imageVector = Icons.Default.Schedule,
-                            contentDescription = "Seleccionar hora"
-                        )
+                    IconButton(
+                        onClick = {
+                            val activity = context as? Activity ?: return@IconButton
+                            if (activity.isFinishing || activity.isDestroyed) return@IconButton
+                            val calendar = Calendar.getInstance()
+                            TimePickerDialog(
+                                activity,
+                                { _, hour, minute ->
+                                    time = LocalTime.of(hour, minute).format(DateTimeFormatter.ofPattern("HH:mm"))
+                                },
+                                calendar.get(Calendar.HOUR_OF_DAY),
+                                calendar.get(Calendar.MINUTE),
+                                true
+                            ).show()
+                        }
+                    ) {
+                        Icon(imageVector = Icons.Default.Schedule, contentDescription = null)
                     }
                 },
                 modifier = Modifier.fillMaxWidth()
@@ -404,16 +448,27 @@ fun NewHabitScreen(
                     Text("Agregar foto")
                 }
                 OutlinedButton(
-                    onClick = { /* TODO: Implement location logic */ },
+                    onClick = { showMapDialog = true },
                     modifier = Modifier.weight(1f)
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.LocationOn,
-                        contentDescription = "Agregar ubicación"
-                    )
+                    Icon(imageVector = Icons.Default.LocationOn, contentDescription = "Select location")
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("Agregar ubicación")
+                    Text(
+                        text = if (location != null || location != "")
+                            "Ubicación seleccionada"
+                        else
+                            "Agregar ubicación"
+                    )
                 }
+            }
+            if (showMapDialog) {
+                LocationPickerDialog(
+                    onDismiss = { showMapDialog = false },
+                    onLocationSelected = { lat, lon ->
+                        location = "$lat,$lon"
+                        showMapDialog = false
+                    }
+                )
             }
 
             Spacer(modifier = Modifier.height(40.dp))
@@ -581,4 +636,101 @@ private fun FrequencyChip(
             )
         }
     }
+}
+
+@Composable
+fun LocationPickerDialog(
+    onDismiss: () -> Unit,
+    onLocationSelected: (Double, Double) -> Unit,
+    initialLatitude: Double? = null,
+    initialLongitude: Double? = null
+) {
+    val context = LocalContext.current
+    var selectedPoint by remember {
+        mutableStateOf(
+            if (initialLatitude != null && initialLongitude != null)
+                GeoPoint(initialLatitude, initialLongitude)
+            else
+                null
+        )
+    }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        confirmButton = {
+            OutlinedButton(
+                onClick = {
+                    selectedPoint?.let {
+                        onLocationSelected(it.latitude, it.longitude)
+                    }
+                },
+                enabled = selectedPoint != null
+            ) {
+                Text("Confirmar")
+            }
+        },
+        dismissButton = {
+            OutlinedButton(onClick = onDismiss) {
+                Text("Cancelar")
+            }
+        },
+        title = { Text("Selecciona una ubicación") },
+        text = {
+            AndroidView(
+                factory = {
+                    MapView(context).apply {
+                        setMultiTouchControls(true)
+                        controller.setZoom(15.0)
+
+                        val startPoint = selectedPoint ?: GeoPoint(-34.6037, -58.3816) // Default: Buenos Aires
+                        controller.setCenter(startPoint)
+
+                        // Show marker if initial location exists
+                        selectedPoint?.let { geoPoint ->
+                            val marker = Marker(this)
+                            marker.position = geoPoint
+                            marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+                            marker.title = "Ubicación seleccionada"
+                            overlays.add(marker)
+                        }
+
+                        // Add tap listener
+                        overlays.add(object : org.osmdroid.views.overlay.Overlay() {
+                            override fun onSingleTapConfirmed(e: android.view.MotionEvent, mapView: MapView): Boolean {
+                                val proj = mapView.projection
+                                val geoPoint = proj.fromPixels(e.x.toInt(), e.y.toInt()) as GeoPoint
+                                selectedPoint = geoPoint
+
+                                // Clear old markers and add new one
+                                mapView.overlays.removeAll { it is Marker }
+                                val marker = Marker(mapView)
+                                marker.position = geoPoint
+                                marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+                                marker.title = "Ubicación seleccionada"
+                                mapView.overlays.add(marker)
+                                mapView.invalidate()
+                                return true
+                            }
+                        })
+                    }
+                },
+                update = { mapView ->
+                    // Update marker when state changes (e.g. recomposition)
+                    selectedPoint?.let { geoPoint ->
+                        mapView.overlays.removeAll { it is Marker }
+                        val marker = Marker(mapView)
+                        marker.position = geoPoint
+                        marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+                        marker.title = "Ubicación seleccionada"
+                        mapView.overlays.add(marker)
+                        mapView.controller.setCenter(geoPoint)
+                        mapView.invalidate()
+                    }
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(300.dp)
+            )
+        }
+    )
 }
