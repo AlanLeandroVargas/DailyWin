@@ -44,6 +44,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -345,7 +346,7 @@ fun WeeklyProgressCard(habit: Habit, viewModel: HabitViewModel) {
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                val days = listOf("L", "M", "X", "J", "V", "S", "D")
+                val days = stringArrayResource(id = R.array.days_of_week_short)
 
                 days.forEachIndexed { index, day ->
                     DayCircle(
@@ -555,7 +556,6 @@ fun HabitLocationMap(location: String) {
     val longitude = parts[1].toDoubleOrNull() ?: return
     val context = LocalContext.current
 
-    // Initialize OSMDroid configuration
     LaunchedEffect(Unit) {
         Configuration.getInstance().load(context, context.getSharedPreferences("osm_prefs", Context.MODE_PRIVATE))
     }
@@ -564,7 +564,7 @@ fun HabitLocationMap(location: String) {
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         Text(
-            text = "Habit Location",
+            text = stringResource(id = R.string.habit_location),
             fontSize = MaterialTheme.typography.titleMedium.fontSize,
             fontWeight = FontWeight.SemiBold
         )
@@ -588,7 +588,7 @@ fun HabitLocationMap(location: String) {
                         val marker = Marker(this).apply {
                             position = startPoint
                             setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
-                            title = "Habit Location"
+                            title = context.getString(R.string.habit_location)
                         }
                         overlays.add(marker)
                     }

@@ -18,7 +18,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.AddAPhoto
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.CalendarToday
@@ -46,10 +45,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringArrayResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
+import com.example.dailywin.R
 import com.example.dailywin.data.model.Frequency
 import com.example.dailywin.data.model.Habit
 import com.example.dailywin.data.model.Priority
@@ -66,7 +68,7 @@ import java.util.Calendar
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NewHabitScreen(
-    habit: Habit? = null,  // Si es null, es creación; si no, es edición
+    habit: Habit? = null,
     onSave: (Habit) -> Unit,
     onCancel: () -> Unit
 ) {
@@ -86,59 +88,14 @@ fun NewHabitScreen(
     var showMapDialog by remember { mutableStateOf(false) }
 
     val context = LocalContext.current
-    val activity = context as? Activity
-    val categories = listOf("Salud", "Productividad", "Finanzas", "Aprendizaje", "Relaciones", "Hobbies")
-
-//    val startDatePicker = remember {
-//        val calendar = Calendar.getInstance()
-//        DatePickerDialog(
-//            context,
-//            { _, year, month, day ->
-//                val selectedDate = LocalDate.of(year, month + 1, day)
-//                startDate = selectedDate
-////                startDate = selectedDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
-//            },
-//            calendar.get(Calendar.YEAR),
-//            calendar.get(Calendar.MONTH),
-//            calendar.get(Calendar.DAY_OF_MONTH)
-//        )
-//    }
-//
-//    val endDatePicker = remember {
-//        val calendar = Calendar.getInstance()
-//        DatePickerDialog(
-//            context,
-//            { _, year, month, day ->
-//                val selectedDate = LocalDate.of(year, month + 1, day)
-//                endDate = selectedDate
-////                endDate = selectedDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
-//            },
-//            calendar.get(Calendar.YEAR),
-//            calendar.get(Calendar.MONTH),
-//            calendar.get(Calendar.DAY_OF_MONTH)
-//        )
-//    }
-//
-//    val timePicker = remember {
-//        val calendar = Calendar.getInstance()
-//        TimePickerDialog(
-//            context,
-//            { _, hour, minute ->
-//                val selectedTime = LocalTime.of(hour, minute)
-//                time = selectedTime.format(DateTimeFormatter.ofPattern("HH:mm"))
-//            },
-//            calendar.get(Calendar.HOUR_OF_DAY),
-//            calendar.get(Calendar.MINUTE),
-//            true
-//        )
-//    }
+    val categories = stringArrayResource(id = R.array.habit_categories)
 
     Scaffold(
         topBar = {
             TopAppBar(
                 title = {
                     Text(
-                        text = if (habit == null) "Nuevo hábito" else "Editar hábito",
+                        text = if (habit == null) stringResource(id = R.string.new_habit) else stringResource(id = R.string.edit_habit),
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Medium
                     )
@@ -147,7 +104,7 @@ fun NewHabitScreen(
                     IconButton(onClick = onCancel) {
                         Icon(
                             imageVector = Icons.Default.ArrowBack,
-                            contentDescription = "Volver"
+                            contentDescription = stringResource(id = R.string.back)
                         )
                     }
                 },
@@ -182,7 +139,7 @@ fun NewHabitScreen(
                     ) {
                         Icon(
                             imageVector = Icons.Default.Check,
-                            contentDescription = "Guardar",
+                            contentDescription = stringResource(id = R.string.save),
                             tint = if (name.isNotBlank())
                                 MaterialTheme.colorScheme.primary
                             else
@@ -204,12 +161,12 @@ fun NewHabitScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
-            SectionTitle(text = "Información básica")
+            SectionTitle(text = stringResource(id = R.string.basic_information))
             OutlinedTextField(
                 value = name,
                 onValueChange = { name = it },
-                label = { Text("Nombre del hábito *") },
-                placeholder = { Text("Ej: Hacer ejercicio") },
+                label = { Text(stringResource(id = R.string.habit_name_required)) },
+                placeholder = { Text(stringResource(id = R.string.habit_name_placeholder)) },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
                 colors = OutlinedTextFieldDefaults.colors(
@@ -220,7 +177,7 @@ fun NewHabitScreen(
 
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(
-                    text = "Categoría",
+                    text = stringResource(id = R.string.category),
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Medium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -253,7 +210,7 @@ fun NewHabitScreen(
                 }
             }
 
-            SectionTitle(text = "Prioridad")
+            SectionTitle(text = stringResource(id = R.string.priority))
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -268,7 +225,7 @@ fun NewHabitScreen(
                 }
             }
 
-            SectionTitle(text = "Frecuencia")
+            SectionTitle(text = stringResource(id = R.string.frequency))
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -284,12 +241,12 @@ fun NewHabitScreen(
             }
             if (selectedFrequency == Frequency.WEEKLY) {
                 Spacer(modifier = Modifier.height(16.dp))
-                SectionTitle(text = "Días de la semana")
+                SectionTitle(text = stringResource(id = R.string.days_of_the_week))
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    val days = listOf("L", "M", "X", "J", "V", "S", "D")
+                    val days = stringArrayResource(id = R.array.days_of_week_short)
                     days.forEach { day ->
                         DayOfWeekChip(
                             day = day,
@@ -307,7 +264,7 @@ fun NewHabitScreen(
                 }
             }
 
-            SectionTitle(text = "Período")
+            SectionTitle(text = stringResource(id = R.string.period))
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -315,8 +272,8 @@ fun NewHabitScreen(
                 OutlinedTextField(
                     value = startDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")),
                     onValueChange = {},
-                    label = { Text("Fecha de inicio") },
-                    placeholder = { Text("Seleccionar") },
+                    label = { Text(stringResource(id = R.string.start_date)) },
+                    placeholder = { Text(stringResource(id = R.string.select)) },
                     readOnly = true,
                     trailingIcon = {
                         IconButton(
@@ -335,7 +292,7 @@ fun NewHabitScreen(
                                 ).show()
                             }
                         ) {
-                            Icon(imageVector = Icons.Default.CalendarToday, contentDescription = null)
+                            Icon(imageVector = Icons.Default.CalendarToday, contentDescription = stringResource(id = R.string.select_date))
                         }
                     },
                     modifier = Modifier.weight(1f)
@@ -344,8 +301,8 @@ fun NewHabitScreen(
                 OutlinedTextField(
                     value = endDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")),
                     onValueChange = {},
-                    label = { Text("Fecha de fin") },
-                    placeholder = { Text("Opcional") },
+                    label = { Text(stringResource(id = R.string.end_date)) },
+                    placeholder = { Text(stringResource(id = R.string.optional)) },
                     readOnly = true,
                     trailingIcon = {
                         IconButton(
@@ -364,19 +321,19 @@ fun NewHabitScreen(
                                 ).show()
                             }
                         ) {
-                            Icon(imageVector = Icons.Default.CalendarToday, contentDescription = null)
+                            Icon(imageVector = Icons.Default.CalendarToday, contentDescription = stringResource(id = R.string.select_date))
                         }
                     },
                     modifier = Modifier.weight(1f)
                 )
             }
 
-            SectionTitle(text = "Recordatorio")
+            SectionTitle(text = stringResource(id = R.string.reminder))
             OutlinedTextField(
                 value = time,
                 onValueChange = {},
-                label = { Text("Hora") },
-                placeholder = { Text("Seleccionar hora") },
+                label = { Text(stringResource(id = R.string.time)) },
+                placeholder = { Text(stringResource(id = R.string.select_time)) },
                 readOnly = true,
                 trailingIcon = {
                     IconButton(
@@ -395,18 +352,18 @@ fun NewHabitScreen(
                             ).show()
                         }
                     ) {
-                        Icon(imageVector = Icons.Default.Schedule, contentDescription = null)
+                        Icon(imageVector = Icons.Default.Schedule, contentDescription = stringResource(id = R.string.select_time))
                     }
                 },
                 modifier = Modifier.fillMaxWidth()
             )
 
-            SectionTitle(text = "Objetivos")
+            SectionTitle(text = stringResource(id = R.string.goals))
             OutlinedTextField(
                 value = dailyGoal,
                 onValueChange = { dailyGoal = it },
-                label = { Text("Objetivo diario") },
-                placeholder = { Text("Ej: 30 minutos") },
+                label = { Text(stringResource(id = R.string.daily_goal)) },
+                placeholder = { Text(stringResource(id = R.string.daily_goal_placeholder)) },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true
             )
@@ -414,24 +371,24 @@ fun NewHabitScreen(
             OutlinedTextField(
                 value = additionalGoal,
                 onValueChange = { additionalGoal = it },
-                label = { Text("Objetivo adicional") },
-                placeholder = { Text("Ej: Perder 5kg en 3 meses") },
+                label = { Text(stringResource(id = R.string.additional_goal)) },
+                placeholder = { Text(stringResource(id = R.string.additional_goal_placeholder)) },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true
             )
 
-            SectionTitle(text = "Notas")
+            SectionTitle(text = stringResource(id = R.string.notes))
             OutlinedTextField(
                 value = description,
                 onValueChange = { description = it },
-                label = { Text("Descripción") },
-                placeholder = { Text("Agrega notas sobre este hábito") },
+                label = { Text(stringResource(id = R.string.description)) },
+                placeholder = { Text(stringResource(id = R.string.description_placeholder)) },
                 modifier = Modifier.fillMaxWidth(),
                 minLines = 3,
                 maxLines = 5
             )
 
-            SectionTitle(text = "Extras")
+            SectionTitle(text = stringResource(id = R.string.extras))
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -442,22 +399,22 @@ fun NewHabitScreen(
                 ) {
                     Icon(
                         imageVector = Icons.Default.AddAPhoto,
-                        contentDescription = "Agregar foto"
+                        contentDescription = stringResource(id = R.string.add_photo)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("Agregar foto")
+                    Text(stringResource(id = R.string.add_photo))
                 }
                 OutlinedButton(
                     onClick = { showMapDialog = true },
                     modifier = Modifier.weight(1f)
                 ) {
-                    Icon(imageVector = Icons.Default.LocationOn, contentDescription = "Select location")
+                    Icon(imageVector = Icons.Default.LocationOn, contentDescription = stringResource(id = R.string.select_location))
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = if (location != null || location != "")
-                            "Ubicación seleccionada"
+                        text = if (location.isNotBlank())
+                            stringResource(id = R.string.location_selected)
                         else
-                            "Agregar ubicación"
+                            stringResource(id = R.string.add_location)
                     )
                 }
             }
@@ -534,9 +491,9 @@ private fun PriorityChip(
     }
 
     val label = when (priority) {
-        Priority.HIGH -> "Alta"
-        Priority.MEDIUM -> "Media"
-        Priority.LOW -> "Baja"
+        Priority.HIGH -> stringResource(id = R.string.priority_high)
+        Priority.MEDIUM -> stringResource(id = R.string.priority_medium)
+        Priority.LOW -> stringResource(id = R.string.priority_low)
     }
 
     Surface(
@@ -606,9 +563,9 @@ private fun FrequencyChip(
     modifier: Modifier = Modifier
 ) {
     val label = when (frequency) {
-        Frequency.DAILY -> "Diaria"
-        Frequency.WEEKLY -> "Semanal"
-        Frequency.MONTHLY -> "Mensual"
+        Frequency.DAILY -> stringResource(id = R.string.frequency_daily)
+        Frequency.WEEKLY -> stringResource(id = R.string.frequency_weekly)
+        Frequency.MONTHLY -> stringResource(id = R.string.frequency_monthly)
     }
 
     Surface(
@@ -666,15 +623,15 @@ fun LocationPickerDialog(
                 },
                 enabled = selectedPoint != null
             ) {
-                Text("Confirmar")
+                Text(stringResource(id = R.string.confirm))
             }
         },
         dismissButton = {
             OutlinedButton(onClick = onDismiss) {
-                Text("Cancelar")
+                Text(stringResource(id = R.string.cancel))
             }
         },
-        title = { Text("Selecciona una ubicación") },
+        title = { Text(stringResource(id = R.string.select_a_location)) },
         text = {
             AndroidView(
                 factory = {
@@ -685,28 +642,25 @@ fun LocationPickerDialog(
                         val startPoint = selectedPoint ?: GeoPoint(-34.6037, -58.3816) // Default: Buenos Aires
                         controller.setCenter(startPoint)
 
-                        // Show marker if initial location exists
                         selectedPoint?.let { geoPoint ->
                             val marker = Marker(this)
                             marker.position = geoPoint
                             marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
-                            marker.title = "Ubicación seleccionada"
+                            marker.title = context.getString(R.string.location_selected)
                             overlays.add(marker)
                         }
 
-                        // Add tap listener
                         overlays.add(object : org.osmdroid.views.overlay.Overlay() {
                             override fun onSingleTapConfirmed(e: android.view.MotionEvent, mapView: MapView): Boolean {
                                 val proj = mapView.projection
                                 val geoPoint = proj.fromPixels(e.x.toInt(), e.y.toInt()) as GeoPoint
                                 selectedPoint = geoPoint
 
-                                // Clear old markers and add new one
                                 mapView.overlays.removeAll { it is Marker }
                                 val marker = Marker(mapView)
                                 marker.position = geoPoint
                                 marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
-                                marker.title = "Ubicación seleccionada"
+                                marker.title = context.getString(R.string.location_selected)
                                 mapView.overlays.add(marker)
                                 mapView.invalidate()
                                 return true
@@ -715,13 +669,12 @@ fun LocationPickerDialog(
                     }
                 },
                 update = { mapView ->
-                    // Update marker when state changes (e.g. recomposition)
                     selectedPoint?.let { geoPoint ->
                         mapView.overlays.removeAll { it is Marker }
                         val marker = Marker(mapView)
                         marker.position = geoPoint
                         marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
-                        marker.title = "Ubicación seleccionada"
+                        marker.title = context.getString(R.string.location_selected)
                         mapView.overlays.add(marker)
                         mapView.controller.setCenter(geoPoint)
                         mapView.invalidate()

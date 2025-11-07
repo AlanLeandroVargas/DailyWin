@@ -299,7 +299,6 @@ fun HabitItemWithMenu(
             .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // Checkbox circular
         if (enabled) {
             Box(
                 modifier = Modifier
@@ -363,7 +362,7 @@ fun HabitItemWithMenu(
 
                 if (habit.category.isNotBlank()) {
                     Text(
-                        text = "•",
+                        text = stringResource(id = R.string.bullet),
                         fontSize = 12.sp,
                         color = color
                     )
@@ -376,7 +375,6 @@ fun HabitItemWithMenu(
             }
         }
 
-        // Streak indicator
         if (habit.streak > 0) {
             Box(
                 modifier = Modifier

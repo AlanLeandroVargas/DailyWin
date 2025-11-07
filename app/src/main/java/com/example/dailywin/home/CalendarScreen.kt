@@ -43,6 +43,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -97,14 +98,12 @@ fun CalendarScreen(
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            // Month Navigation
             MonthNavigator(
                 currentMonth = currentMonth,
                 onPreviousMonth = { currentMonth = currentMonth.minusMonths(1) },
                 onNextMonth = { currentMonth = currentMonth.plusMonths(1) }
             )
 
-            // Calendar Grid
             CalendarGrid(
                 currentMonth = currentMonth,
                 selectedDate = selectedDate,
@@ -114,7 +113,6 @@ fun CalendarScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Habits for selected date
             HabitsForDay(
                 date = selectedDate,
                 habits = habits.filter { habit -> viewModel.isHabitDueOnDate(habit, selectedDate) },
@@ -167,7 +165,7 @@ fun CalendarGrid(
     onDateSelected: (LocalDate) -> Unit,
     habits: List<Habit>
 ) {
-    val daysOfWeek = listOf("L", "M", "X", "J", "V", "S", "D")
+    val daysOfWeek = stringArrayResource(id = R.array.days_of_week_short)
     val firstDayOfMonth = currentMonth.atDay(1)
     val daysInMonth = currentMonth.lengthOfMonth()
     val firstDayOfWeek = firstDayOfMonth.dayOfWeek.value
@@ -177,7 +175,6 @@ fun CalendarGrid(
             .fillMaxWidth()
             .padding(horizontal = 16.dp)
     ) {
-        // Days of week header
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceEvenly
@@ -199,7 +196,6 @@ fun CalendarGrid(
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        // Calendar days
         var dayCounter = 1
         repeat(6) { week ->
             Row(
@@ -298,7 +294,7 @@ fun HabitsForDay(
             .padding(horizontal = 16.dp)
     ) {
         Text(
-            text = date.format(DateTimeFormatter.ofPattern("EEEE, d 'de' MMMM", Locale.getDefault())),
+            text = date.format(DateTimeFormatter.ofPattern(stringResource(id = R.string.date_format_es), Locale.getDefault())),
             fontSize = 16.sp,
             fontWeight = FontWeight.SemiBold,
             modifier = Modifier.padding(bottom = 12.dp)
@@ -420,7 +416,7 @@ fun HabitCalendarItem(
                 shape = RoundedCornerShape(8.dp)
             ) {
                 Text(
-                    text = "${habit.streak} días",
+                    text = stringResource(id = R.string.streak_days_calendar, habit.streak),
                     fontSize = 11.sp,
                     fontWeight = FontWeight.Medium,
                     color = getPriorityColor(habit.priority),

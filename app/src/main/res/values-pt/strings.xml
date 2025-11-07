@@ -6,7 +6,7 @@
     <string name="settings">Configurações</string>
     <string name="log_out">Sair</string>
     <string name="add_habit">Adicionar hábito</string>
-    <string name="no_habits">Não há hábitos</string>
+    <string name="no_habits">Sem hábitos</string>
     <string name="tap_to_create_habit">Toque em + para criar seu primeiro hábito</string>
     <string name="habits_for_today">Hábitos para hoje</string>
     <string name="other_active_habits">Outros hábitos ativos</string>
@@ -21,17 +21,17 @@
     <string name="portuguese">Português</string>
 
     <!-- Login Screen -->
-    <string name="email">Email</string>
+    <string name="email">E-mail</string>
     <string name="password">Senha</string>
     <string name="toggle_password_visibility">Alternar visibilidade da senha</string>
     <string name="login">Entrar</string>
-    <string name="no_account_prompt">Não tem uma conta? Crie uma aqui</string>
+    <string name="no_account_prompt">Não tem conta? Crie uma aqui</string>
 
     <!-- Registration Screen -->
     <string name="name">Nome</string>
     <string name="last_name">Sobrenome</string>
     <string name="register">Registrar</string>
-    <string name="already_have_account_prompt">Já tem uma conta? Faça login aqui</string>
+    <string name="already_have_account_prompt">Já tem conta? Entre aqui</string>
 
     <!-- New/Edit Habit Screen -->
     <string name="new_habit">Novo hábito</string>
@@ -45,7 +45,7 @@
     <string name="category_health">Saúde</string>
     <string name="category_productivity">Produtividade</string>
     <string name="category_finance">Finanças</string>
-    <string name="category_learning">Aprendizagem</string>
+    <string name="category_learning">Aprendizado</string>
     <string name="category_relationships">Relacionamentos</string>
     <string name="category_hobbies">Hobbies</string>
     <string name="priority">Prioridade</string>
@@ -61,28 +61,55 @@
     <string name="start_date">Data de início</string>
     <string name="select">Selecionar</string>
     <string name="select_date">Selecionar data</string>
-    <string name="end_date">Data de fim</string>
+    <string name="end_date">Data de término</string>
     <string name="optional">Opcional</string>
     <string name="reminder">Lembrete</string>
     <string name="time">Hora</string>
     <string name="select_time">Selecionar hora</string>
-    <string name="goals">Metas</string>
-    <string name="daily_goal">Meta diária</string>
+    <string name="goals">Objetivos</string>
+    <string name="daily_goal">Objetivo diário</string>
     <string name="daily_goal_placeholder">Ex: 30 minutos</string>
-    <string name="additional_goal">Meta adicional</string>
+    <string name="additional_goal">Objetivo adicional</string>
     <string name="additional_goal_placeholder">Ex: Perder 5kg em 3 meses</string>
     <string name="notes">Notas</string>
     <string name="description">Descrição</string>
     <string name="description_placeholder">Adicione notas sobre este hábito</string>
     <string name="extras">Extras</string>
     <string name="add_photo">Adicionar foto</string>
+    <string name="select_location">Selecionar localização</string>
+    <string name="location_selected">Localização selecionada</string>
     <string name="add_location">Adicionar localização</string>
+    <string name="confirm">Confirmar</string>
+    <string name="cancel">Cancelar</string>
+    <string name="select_a_location">Selecione uma localização</string>
     <string name="options">Opções</string>
+    <string name="bullet">•</string>
+
+    <string-array name="habit_categories">
+        <item>@string/category_health</item>
+        <item>@string/category_productivity</item>
+        <item>@string/category_finance</item>
+        <item>@string/category_learning</item>
+        <item>@string/category_relationships</item>
+        <item>@string/category_hobbies</item>
+    </string-array>
+
+    <string-array name="days_of_week_short">
+        <item>S</item>
+        <item>T</item>
+        <item>Q</item>
+        <item>Q</item>
+        <item>S</item>
+        <item>S</item>
+        <item>D</item>
+    </string-array>
 
     <!-- Calendar Screen -->
     <string name="previous_month">Mês anterior</string>
     <string name="next_month">Próximo mês</string>
-    <string name="no_habits_for_this_day">Não há hábitos para este dia</string>
+    <string name="no_habits_for_this_day">Sem hábitos para este dia</string>
+    <string name="date_format_es">EEEE, d \'de\' MMMM</string>
+    <string name="streak_days_calendar">"%1$d dias"</string>
 
     <!-- Habit Detail Screen -->
     <string name="edit_habit_title">Editar Hábito</string>
@@ -90,9 +117,24 @@
     <string name="yes">Sim</string>
     <string name="no">Não</string>
     <string name="completed_today">Concluído hoje</string>
-    <string name="information">Informações</string>
+    <string name="information">Informação</string>
     <string name="weekly_progress">Progresso da semana</string>
     <string name="days_completed_this_week">%1$d de 7 dias concluídos esta semana</string>
-    <string name="daily_goal_label">Meta diária: %1$s</string>
+    <string name="daily_goal_label">Objetivo diário: %1$s</string>
     <string name="completion_calendar">Calendário de conclusão</string>
+    <string name="habit_location">Localização do hábito</string>
+
+    <!-- Stats Screen -->
+    <string name="today_progress">Progresso de Hoje</string>
+    <string name="completed_of_total">"%1$d de %2$d concluídos"</string>
+    <string name="general_summary">Resumo Geral</string>
+    <string name="longest_streak">Maior sequência</string>
+    <string name="general_rate">Taxa Geral</string>
+    <string name="habits">Hábitos</string>
+    <string name="progress_by_habit">Progresso por Hábito</string>
+    <string name="no_habits_registered">Nenhum hábito registrado</string>
+    <string name="days_streak">"%1$d dias"</string>
+    <string name="habits_by_category">Hábitos por Categoria</string>
+    <string name="no_habits_with_category">Nenhum hábito tem categoria</string>
+    <string name="habits_count_percentage">"%1$d hábitos (%2$d%%)"</string>
 </resources>

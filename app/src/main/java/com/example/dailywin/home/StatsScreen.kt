@@ -39,9 +39,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.dailywin.R
 import com.example.dailywin.data.model.Habit
 import java.time.LocalDate
 
@@ -70,7 +72,7 @@ fun StatsScreen(
             TopAppBar(
                 title = {
                     Text(
-                        text = "Estadísticas",
+                        text = stringResource(id = R.string.statistics),
                         fontSize = 20.sp,
                         fontWeight = FontWeight.Medium
                     )
@@ -79,7 +81,7 @@ fun StatsScreen(
                     IconButton(onClick = onBack) {
                         Icon(
                             imageVector = Icons.Default.ArrowBack,
-                            contentDescription = "Volver"
+                            contentDescription = stringResource(id = R.string.back)
                         )
                     }
                 },
@@ -148,14 +150,14 @@ fun TodayCard(
             ) {
                 Column {
                     Text(
-                        text = "Progreso de Hoy",
+                        text = stringResource(id = R.string.today_progress),
                         fontSize = 16.sp,
                         fontWeight = FontWeight.SemiBold,
                         color = MaterialTheme.colorScheme.onPrimaryContainer
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = "$completedToday de $totalHabits completados",
+                        text = stringResource(id = R.string.completed_of_total, completedToday, totalHabits),
                         fontSize = 14.sp,
                         color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
                     )
@@ -189,6 +191,7 @@ fun TodayCard(
         }
     }
 }
+
 @Composable
 fun GeneralStatsCard(
     longestStreak: Int,
@@ -206,7 +209,7 @@ fun GeneralStatsCard(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             Text(
-                text = "Resumen General",
+                text = stringResource(id = R.string.general_summary),
                 fontSize = 16.sp,
                 fontWeight = FontWeight.SemiBold
             )
@@ -218,21 +221,21 @@ fun GeneralStatsCard(
                 StatBox(
                     icon = Icons.Default.LocalFireDepartment,
                     value = longestStreak.toString(),
-                    label = "Racha más larga",
+                    label = stringResource(id = R.string.longest_streak),
                     color = Color(0xFFE53935)
                 )
 
                 StatBox(
                     icon = Icons.Default.TrendingUp,
                     value = "${(overallCompletionRate * 100).toInt()}%",
-                    label = "Tasa General",
+                    label = stringResource(id = R.string.general_rate),
                     color = Color(0xFF43A047)
                 )
 
                 StatBox(
                     icon = Icons.Default.Star,
                     value = totalHabits.toString(),
-                    label = "Hábitos",
+                    label = stringResource(id = R.string.habits),
                     color = Color(0xFFFB8C00)
                 )
             }
@@ -292,7 +295,7 @@ fun HabitsProgressCard(habits: List<Habit>, viewModel: HabitViewModel) {
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Text(
-                text = "Progreso por Hábito",
+                text = stringResource(id = R.string.progress_by_habit),
                 fontSize = 16.sp,
                 fontWeight = FontWeight.SemiBold
             )
@@ -305,7 +308,7 @@ fun HabitsProgressCard(habits: List<Habit>, viewModel: HabitViewModel) {
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = "No hay hábitos registrados",
+                        text = stringResource(id = R.string.no_habits_registered),
                         fontSize = 14.sp,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -366,7 +369,7 @@ fun HabitProgressItem(habit: Habit, viewModel: HabitViewModel) {
                     modifier = Modifier.size(16.dp)
                 )
                 Text(
-                    text = "${habit.streak} días",
+                    text = stringResource(id = R.string.days_streak, habit.streak),
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color(0xFFE53935)
@@ -406,7 +409,7 @@ fun CategoriesCard(habits: List<Habit>) {
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Text(
-                text = "Hábitos por Categoría",
+                text = stringResource(id = R.string.habits_by_category),
                 fontSize = 16.sp,
                 fontWeight = FontWeight.SemiBold
             )
@@ -419,7 +422,7 @@ fun CategoriesCard(habits: List<Habit>) {
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = "Ningún hábito tiene categoría",
+                        text = stringResource(id = R.string.no_habits_with_category),
                         fontSize = 14.sp,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -461,7 +464,11 @@ fun CategoryItem(
                 fontWeight = FontWeight.Medium
             )
             Text(
-                text = "$count hábitos (${(animatedProgress * 100).toInt()}%)",
+                text = stringResource(
+                    id = R.string.habits_count_percentage,
+                    count,
+                    (animatedProgress * 100).toInt()
+                ),
                 fontSize = 12.sp,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )

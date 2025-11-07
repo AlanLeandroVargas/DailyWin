@@ -24,12 +24,12 @@
     <string name="email">Email</string>
     <string name="password">Password</string>
     <string name="toggle_password_visibility">Toggle password visibility</string>
-    <string name="login">Login</string>
+    <string name="login">Log in</string>
     <string name="no_account_prompt">Don\'t have an account? Create one here</string>
 
     <!-- Registration Screen -->
     <string name="name">Name</string>
-    <string name="last_name">Last Name</string>
+    <string name="last_name">Last name</string>
     <string name="register">Register</string>
     <string name="already_have_account_prompt">Already have an account? Log in here</string>
 
@@ -40,7 +40,7 @@
     <string name="save">Save</string>
     <string name="basic_information">Basic information</string>
     <string name="habit_name_required">Habit name *</string>
-    <string name="habit_name_placeholder">E.g., Exercise</string>
+    <string name="habit_name_placeholder">E.g.: Exercise</string>
     <string name="category">Category</string>
     <string name="category_health">Health</string>
     <string name="category_productivity">Productivity</string>
@@ -68,21 +68,48 @@
     <string name="select_time">Select time</string>
     <string name="goals">Goals</string>
     <string name="daily_goal">Daily goal</string>
-    <string name="daily_goal_placeholder">E.g., 30 minutes</string>
+    <string name="daily_goal_placeholder">E.g.: 30 minutes</string>
     <string name="additional_goal">Additional goal</string>
-    <string name="additional_goal_placeholder">E.g., Lose 5kg in 3 months</string>
+    <string name="additional_goal_placeholder">E.g.: Lose 5kg in 3 months</string>
     <string name="notes">Notes</string>
     <string name="description">Description</string>
     <string name="description_placeholder">Add notes about this habit</string>
     <string name="extras">Extras</string>
     <string name="add_photo">Add photo</string>
+    <string name="select_location">Select location</string>
+    <string name="location_selected">Location selected</string>
     <string name="add_location">Add location</string>
+    <string name="confirm">Confirm</string>
+    <string name="cancel">Cancel</string>
+    <string name="select_a_location">Select a location</string>
     <string name="options">Options</string>
+    <string name="bullet">•</string>
+
+    <string-array name="habit_categories">
+        <item>@string/category_health</item>
+        <item>@string/category_productivity</item>
+        <item>@string/category_finance</item>
+        <item>@string/category_learning</item>
+        <item>@string/category_relationships</item>
+        <item>@string/category_hobbies</item>
+    </string-array>
+
+    <string-array name="days_of_week_short">
+        <item>M</item>
+        <item>T</item>
+        <item>W</item>
+        <item>T</item>
+        <item>F</item>
+        <item>S</item>
+        <item>S</item>
+    </string-array>
 
     <!-- Calendar Screen -->
     <string name="previous_month">Previous month</string>
     <string name="next_month">Next month</string>
     <string name="no_habits_for_this_day">No habits for this day</string>
+    <string name="date_format_es">EEEE, MMMM d</string>
+    <string name="streak_days_calendar">"%1$d days"</string>
 
     <!-- Habit Detail Screen -->
     <string name="edit_habit_title">Edit Habit</string>
@@ -95,4 +122,19 @@
     <string name="days_completed_this_week">%1$d of 7 days completed this week</string>
     <string name="daily_goal_label">Daily goal: %1$s</string>
     <string name="completion_calendar">Completion calendar</string>
+    <string name="habit_location">Habit location</string>
+
+    <!-- Stats Screen -->
+    <string name="today_progress">Today\'s Progress</string>
+    <string name="completed_of_total">"%1$d of %2$d completed"</string>
+    <string name="general_summary">General Summary</string>
+    <string name="longest_streak">Longest streak</string>
+    <string name="general_rate">General Rate</string>
+    <string name="habits">Habits</string>
+    <string name="progress_by_habit">Progress by Habit</string>
+    <string name="no_habits_registered">No habits registered</string>
+    <string name="days_streak">"%1$d days"</string>
+    <string name="habits_by_category">Habits by Category</string>
+    <string name="no_habits_with_category">No habits have a category</string>
+    <string name="habits_count_percentage">"%1$d habits (%2$d%%)"</string>
 </resources>

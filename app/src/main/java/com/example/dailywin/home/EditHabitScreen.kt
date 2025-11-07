@@ -103,7 +103,6 @@ fun EditHabitScreen(
             { _, year, month, day ->
                 val selectedDate = LocalDate.of(year, month + 1, day)
                 endDate = selectedDate
-//                endDate = selectedDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
             },
             calendar.get(Calendar.YEAR),
             calendar.get(Calendar.MONTH),
