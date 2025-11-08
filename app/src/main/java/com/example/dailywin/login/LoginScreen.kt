@@ -53,8 +53,17 @@ fun LoginScreen(
             TextField(
                 value = state.value.email,
                 onValueChange = { viewModel.onEmailChange(it) },
-                label = { Text(stringResource(id = R.string.email)) }
+                label = { Text(stringResource(id = R.string.email)) },
+                isError = state.value.emailError != null
             )
+            state.value.emailError?.let {
+                Text(
+                    text = stringResource(id = it),
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier.padding(start = 16.dp)
+                )
+            }
 
             Spacer(modifier = Modifier.height(12.dp))
 
@@ -63,6 +72,7 @@ fun LoginScreen(
                 onValueChange = { viewModel.onPasswordChange(it) },
                 label = { Text(stringResource(id = R.string.password)) },
                 visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                isError = state.value.passwordError != null,
                 trailingIcon = {
                     val image = if (passwordVisible)
                         Icons.Filled.Visibility
@@ -73,6 +83,14 @@ fun LoginScreen(
                     }
                 }
             )
+            state.value.passwordError?.let {
+                Text(
+                    text = stringResource(id = it),
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier.padding(start = 16.dp)
+                )
+            }
 
             Spacer(modifier = Modifier.height(20.dp))
 

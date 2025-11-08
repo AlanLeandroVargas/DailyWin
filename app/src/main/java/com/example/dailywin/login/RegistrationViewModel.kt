@@ -38,7 +38,7 @@ class RegistrationViewModel : ViewModel() {
     }
 
     private fun validatePassword(password: String): Int? {
-        if (password.length < 6) {
+        if (password.length < 8) {
             return R.string.password_error_length
         }
         if (!password.any { it.isDigit() }) {

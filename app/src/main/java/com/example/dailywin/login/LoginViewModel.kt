@@ -1,6 +1,7 @@
 package com.example.dailywin.login
 
 import androidx.lifecycle.ViewModel
+import com.example.dailywin.R
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
@@ -19,13 +20,31 @@ class LoginViewModel : ViewModel() {
     val uiState: StateFlow<LoginUiState> = _uiState
 
     fun onEmailChange(email: String) {
-        _uiState.value = _uiState.value.copy(email = email)
+        _uiState.value = _uiState.value.copy(email = email, emailError = null)
     }
 
     fun onPasswordChange(password: String) {
-        _uiState.value = _uiState.value.copy(password = password)
+        _uiState.value = _uiState.value.copy(password = password, passwordError = null)
     }
+
+    private fun validate(): Boolean {
+        val currentState = _uiState.value
+        val emailError = if (currentState.email.isBlank()) R.string.error_field_required else null
+        val passwordError = if (currentState.password.isBlank()) R.string.error_field_required else null
+
+        _uiState.value = currentState.copy(
+            emailError = emailError,
+            passwordError = passwordError
+        )
+
+        return emailError == null && passwordError == null
+    }
+
     fun signIn() {
+        if (!validate()) {
+            return
+        }
+
         val email = _uiState.value.email
         val password = _uiState.value.password
         auth.signInWithEmailAndPassword(email, password)
@@ -36,9 +55,5 @@ class LoginViewModel : ViewModel() {
                     _signInResult.value = Result.failure(task.exception ?: Exception("Sign-in failed"))
                 }
             }
-    }
-
-    fun login(): Boolean {
-        return _uiState.value.email.isNotBlank() && _uiState.value.password.isNotBlank()
     }
 }

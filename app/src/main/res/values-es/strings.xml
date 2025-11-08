@@ -38,8 +38,8 @@
     <string name="last_name">Apellido</string>
     <string name="register">Registrarse</string>
     <string name="already_have_account_prompt">¿Ya tienes cuenta? Inicia sesión aquí</string>
-    <string name="password_requirements">La contraseña debe tener al menos 6 caracteres, incluyendo una mayúscula, un número y un carácter especial.</string>
-    <string name="password_error_length">La contraseña debe tener al menos 6 caracteres.</string>
+    <string name="password_requirements">La contraseña debe tener al menos 8 caracteres, incluyendo una mayúscula, un número y un carácter especial.</string>
+    <string name="password_error_length">La contraseña debe tener al menos 8 caracteres.</string>
     <string name="password_error_digit">La contraseña debe contener al menos un número.</string>
     <string name="password_error_uppercase">La contraseña debe contener al menos una mayúscula.</string>
     <string name="password_error_special_char">La contraseña debe contener al menos un carácter especial.</string>
