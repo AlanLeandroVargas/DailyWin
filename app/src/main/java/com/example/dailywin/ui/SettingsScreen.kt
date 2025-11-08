@@ -44,7 +44,9 @@ fun SettingsScreen(
     val languageViewModel: LanguageViewModel = viewModel(
         factory = LanguageViewModelFactory(LanguageRepository(context))
     )
+    val themeViewModel: ThemeViewModel = viewModel()
     val selectedLanguage by languageViewModel.language.collectAsState()
+    val selectedTheme by themeViewModel.theme.collectAsState()
     val activity = LocalActivity.current
 
     Scaffold(
@@ -55,7 +57,7 @@ fun SettingsScreen(
                     IconButton(onClick = onNavigateUp) {
                         Icon(
                             imageVector = Icons.Default.ArrowBack,
-                            contentDescription = "Back"
+                            contentDescription = stringResource(id = R.string.back)
                         )
                     }
                 }
@@ -66,13 +68,21 @@ fun SettingsScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .padding(16.dp)
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             LanguageSelector(
                 selectedLanguage = selectedLanguage,
                 onLanguageSelected = { language ->
-                    languageViewModel.setLanguage(language)
-                    activity?.recreate()
+                    languageViewModel.setLanguage(language) {
+                        activity?.recreate()
+                    }
+                }
+            )
+            ThemeSelector(
+                selectedTheme = selectedTheme,
+                onThemeSelected = { theme ->
+                    themeViewModel.setTheme(theme)
                 }
             )
         }
@@ -119,6 +129,55 @@ fun LanguageSelector(
                         text = { Text(text = name) },
                         onClick = {
                             onLanguageSelected(code)
+                            expanded = false
+                        }
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun ThemeSelector(
+    selectedTheme: String,
+    onThemeSelected: (String) -> Unit
+) {
+    var expanded by remember { mutableStateOf(false) }
+    val themes = mapOf(
+        "light" to stringResource(id = R.string.light),
+        "dark" to stringResource(id = R.string.dark),
+        "system" to stringResource(id = R.string.system)
+    )
+
+    Column {
+        Text(text = stringResource(id = R.string.theme))
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { expanded = true }
+                .padding(vertical = 16.dp)
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(text = themes[selectedTheme] ?: "")
+                Icon(
+                    imageVector = Icons.Default.ArrowDropDown,
+                    contentDescription = null
+                )
+            }
+            DropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false }
+            ) {
+                themes.forEach { (code, name) ->
+                    DropdownMenuItem(
+                        text = { Text(text = name) },
+                        onClick = {
+                            onThemeSelected(code)
                             expanded = false
                         }
                     )

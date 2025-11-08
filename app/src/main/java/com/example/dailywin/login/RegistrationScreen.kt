@@ -48,24 +48,51 @@ fun RegistrationScreen(
             TextField(
                 value = state.value.name,
                 onValueChange = { viewModel.onNameChange(it) },
-                label = { Text(stringResource(id = R.string.name)) }
+                label = { Text(stringResource(id = R.string.name)) },
+                isError = state.value.nameError != null
             )
+            state.value.nameError?.let {
+                Text(
+                    text = stringResource(id = it),
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier.padding(start = 16.dp)
+                )
+            }
 
             Spacer(modifier = Modifier.height(12.dp))
 
             TextField(
                 value = state.value.lastName,
                 onValueChange = { viewModel.onLastNameChange(it) },
-                label = { Text(stringResource(id = R.string.last_name)) }
+                label = { Text(stringResource(id = R.string.last_name)) },
+                isError = state.value.lastNameError != null
             )
+            state.value.lastNameError?.let {
+                Text(
+                    text = stringResource(id = it),
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier.padding(start = 16.dp)
+                )
+            }
 
             Spacer(modifier = Modifier.height(12.dp))
 
             TextField(
                 value = state.value.email,
                 onValueChange = { viewModel.onEmailChange(it) },
-                label = { Text(stringResource(id = R.string.email)) }
+                label = { Text(stringResource(id = R.string.email)) },
+                isError = state.value.emailError != null
             )
+            state.value.emailError?.let {
+                Text(
+                    text = stringResource(id = it),
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier.padding(start = 16.dp)
+                )
+            }
 
             Spacer(modifier = Modifier.height(12.dp))
 
@@ -73,8 +100,23 @@ fun RegistrationScreen(
                 value = state.value.password,
                 onValueChange = { viewModel.onPasswordChange(it) },
                 label = { Text(stringResource(id = R.string.password)) },
-                visualTransformation = PasswordVisualTransformation()
+                visualTransformation = PasswordVisualTransformation(),
+                isError = state.value.passwordError != null
             )
+            if (state.value.passwordError != null) {
+                Text(
+                    text = stringResource(id = state.value.passwordError!!),
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier.padding(start = 16.dp)
+                )
+            } else {
+                Text(
+                    text = stringResource(id = R.string.password_requirements),
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier.padding(start = 16.dp, top = 4.dp)
+                )
+            }
 
             Spacer(modifier = Modifier.height(20.dp))
 

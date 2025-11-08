@@ -394,17 +394,6 @@ fun NewHabitScreen(
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 OutlinedButton(
-                    onClick = { /* TODO: Implement camera logic */ },
-                    modifier = Modifier.weight(1f)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.AddAPhoto,
-                        contentDescription = stringResource(id = R.string.add_photo)
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(stringResource(id = R.string.add_photo))
-                }
-                OutlinedButton(
                     onClick = { showMapDialog = true },
                     modifier = Modifier.weight(1f)
                 ) {

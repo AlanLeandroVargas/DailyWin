@@ -13,6 +13,7 @@ import android.os.Bundle
 import android.provider.Settings
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
@@ -32,6 +33,7 @@ import com.example.dailywin.home.HabitViewModel
 import com.example.dailywin.navigation.AppNavGraph
 import com.example.dailywin.navigation.Screen
 import com.example.dailywin.ui.LanguageRepository
+import com.example.dailywin.ui.ThemeViewModel
 import com.example.dailywin.ui.theme.DailyWinTheme
 import com.google.firebase.auth.FirebaseAuth
 import org.osmdroid.config.Configuration
@@ -55,10 +57,18 @@ class MainActivity : ComponentActivity() {
         createNotificationChannel()
         setContent {
             val language by languageRepository.language.collectAsState(initial = "en")
+            val themeViewModel: ThemeViewModel = viewModel()
+            val theme by themeViewModel.theme.collectAsState()
 
             // Apply locale immediately
             updateLocale(language)
-            DailyWinTheme {
+            DailyWinTheme(
+                darkTheme = when (theme) {
+                    "light" -> false
+                    "dark" -> true
+                    else -> isSystemInDarkTheme()
+                }
+            ) {
                 DailyWinApp()
             }
         }

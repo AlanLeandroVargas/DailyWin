@@ -1,6 +1,8 @@
 package com.example.dailywin.login
 
+import android.util.Patterns
 import androidx.lifecycle.ViewModel
+import com.example.dailywin.R
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
@@ -20,22 +22,65 @@ class RegistrationViewModel : ViewModel() {
     val uiState: StateFlow<RegistrationUiState> = _uiState
 
     fun onNameChange(name: String) {
-        _uiState.value = _uiState.value.copy(name = name)
+        _uiState.value = _uiState.value.copy(name = name, nameError = null)
     }
 
     fun onLastNameChange(lastName: String) {
-        _uiState.value = _uiState.value.copy(lastName = lastName)
+        _uiState.value = _uiState.value.copy(lastName = lastName, lastNameError = null)
     }
 
     fun onEmailChange(email: String) {
-        _uiState.value = _uiState.value.copy(email = email)
+        _uiState.value = _uiState.value.copy(email = email, emailError = null)
     }
 
     fun onPasswordChange(password: String) {
-        _uiState.value = _uiState.value.copy(password = password)
+        _uiState.value = _uiState.value.copy(password = password, passwordError = null)
+    }
+
+    private fun validatePassword(password: String): Int? {
+        if (password.length < 6) {
+            return R.string.password_error_length
+        }
+        if (!password.any { it.isDigit() }) {
+            return R.string.password_error_digit
+        }
+        if (!password.any { it.isUpperCase() }) {
+            return R.string.password_error_uppercase
+        }
+        if (password.all { it.isLetterOrDigit() }) {
+            return R.string.password_error_special_char
+        }
+        return null
+    }
+
+    private fun validate(): Boolean {
+        val currentState = _uiState.value
+        val nameError = if (currentState.name.isBlank()) R.string.error_field_required else null
+        val lastNameError = if (currentState.lastName.isBlank()) R.string.error_field_required else null
+        val emailError = if (currentState.email.isBlank()) {
+            R.string.error_field_required
+        } else if (!Patterns.EMAIL_ADDRESS.matcher(currentState.email).matches()) {
+            R.string.error_invalid_email
+        } else {
+            null
+        }
+        val passwordError = validatePassword(currentState.password)
+
+        _uiState.value = currentState.copy(
+            nameError = nameError,
+            lastNameError = lastNameError,
+            emailError = emailError,
+            passwordError = passwordError
+        )
+
+        return nameError == null && lastNameError == null && emailError == null && passwordError == null
     }
 
     fun createAccount() {
+        if (!validate()) {
+            return
+        }
+
         val email = _uiState.value.email
         val password = _uiState.value.password
         val name = _uiState.value.name

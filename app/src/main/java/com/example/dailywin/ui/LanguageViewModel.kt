@@ -16,9 +16,10 @@ class LanguageViewModel(private val repository: LanguageRepository) : ViewModel(
         initialValue = "en"
     )
 
-    fun setLanguage(language: String) {
+    fun setLanguage(language: String, onLanguageSet: () -> Unit) {
         viewModelScope.launch {
             repository.setLanguage(language)
+            onLanguageSet()
         }
     }
 }

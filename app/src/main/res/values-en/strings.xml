@@ -19,6 +19,10 @@
     <string name="english">English</string>
     <string name="spanish">Spanish</string>
     <string name="portuguese">Portuguese</string>
+    <string name="theme">Theme</string>
+    <string name="light">Light</string>
+    <string name="dark">Dark</string>
+    <string name="system">System</string>
 
     <!-- Login Screen -->
     <string name="email">Email</string>
@@ -28,10 +32,17 @@
     <string name="no_account_prompt">Don\'t have an account? Create one here</string>
 
     <!-- Registration Screen -->
+    <string name="error_field_required">This field is required.</string>
+    <string name="error_invalid_email">The email address is invalid.</string>
     <string name="name">Name</string>
-    <string name="last_name">Last name</string>
+    <string name="last_name">Last Name</string>
     <string name="register">Register</string>
     <string name="already_have_account_prompt">Already have an account? Log in here</string>
+    <string name="password_requirements">Password must be at least 6 characters long, including an uppercase letter, a number, and a special character.</string>
+    <string name="password_error_length">Password must be at least 6 characters long.</string>
+    <string name="password_error_digit">Password must contain at least one number.</string>
+    <string name="password_error_uppercase">Password must contain at least one uppercase letter.</string>
+    <string name="password_error_special_char">Password must contain at least one special character.</string>
 
     <!-- New/Edit Habit Screen -->
     <string name="new_habit">New habit</string>
